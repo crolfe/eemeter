@@ -9,6 +9,7 @@ import copy
 
 from eemeter.evaluation import Period
 
+
 class ConsumptionData(object):
     """ Container for consumption data initialized from records.
     Warns about overlapping data, and allows for a few different ways
@@ -282,9 +283,17 @@ class ConsumptionData(object):
         },
     }
 
-    def __init__(self, records, fuel_type, unit_name,
-            record_type="interval", freq=None, pulse_value=None, name=None,
-            data=None, estimated=None):
+    def __init__(
+            self,
+            records,
+            fuel_type,
+            unit_name,
+            record_type="interval",
+            freq=None,
+            pulse_value=None,
+            name=None,
+            data=None,
+            estimated=None):
 
         # verify and save unit name
         if unit_name in self.UNITS:
@@ -296,11 +305,10 @@ class ConsumptionData(object):
             message = 'Unsupported unit name: "{}".'.format(unit_name)
             raise ValueError(message)
 
-
         # verify and save fuel type
         if fuel_type not in ["electricity", "natural_gas", "fuel_oil",
-                "propane", "liquid_propane", "kerosene", "diesel",
-                "fuel_cell"]:
+                             "propane", "liquid_propane", "kerosene", "diesel",
+                             "fuel_cell"]:
             message = 'Unsupported fuel type: "{}".'.format(fuel_type)
             raise ValueError(message)
         else:
@@ -318,9 +326,9 @@ class ConsumptionData(object):
                 raise ValueError(message)
             if estimated is None:
                 message = "Please provide the the `estimated` attribute," \
-                        " which contains boolean values indicating whether" \
-                        " or not the data is estimated. Should have the same" \
-                        " index as `data`"
+                    " which contains boolean values indicating whether" \
+                    " or not the data is estimated. Should have the same" \
+                    " index as `data`"
                 raise ValueError(message)
             self.data = data
             self.estimated = estimated
@@ -328,38 +336,38 @@ class ConsumptionData(object):
             # set frequency, if supplied.
             if freq is None:
                 self.freq_timedelta = None
-            elif freq[-1] not in ["D","H","T","S"]:
+            elif freq[-1] not in ["D", "H", "T", "S"]:
                 # Improper configuration
                 message = 'Invalid frequency specification: "{}".'.format(freq)
                 raise ValueError(message)
             else:
                 try:
-                    dummy_start_date = datetime(1970,1,1,tzinfo=pytz.utc)
+                    dummy_start_date = datetime(1970, 1, 1, tzinfo=pytz.utc)
                     dummy_date_range = pd.date_range(dummy_start_date,
-                            periods=2, freq=freq)
+                                                     periods=2, freq=freq)
                     freq_timedelta = dummy_date_range[1] - dummy_date_range[0]
                 except ValueError:
                     message = 'Invalid frequency specification: "{}".'\
-                            .format(freq)
+                        .format(freq)
                     raise ValueError(message)
                 self.freq_timedelta = freq_timedelta
             return
 
         # import records
         if "interval" == record_type:
-            if freq is None or freq[-1] not in ["D","H","T","S"]:
+            if freq is None or freq[-1] not in ["D", "H", "T", "S"]:
                 # Improper configuration
                 message = 'Invalid frequency specification: "{}".'.format(freq)
                 raise ValueError(message)
             else:
                 try:
-                    dummy_start_date = datetime(1970,1,1,tzinfo=pytz.utc)
+                    dummy_start_date = datetime(1970, 1, 1, tzinfo=pytz.utc)
                     dummy_date_range = pd.date_range(dummy_start_date,
-                            periods=2, freq=freq)
+                                                     periods=2, freq=freq)
                     freq_timedelta = dummy_date_range[1] - dummy_date_range[0]
                 except ValueError:
                     message = 'Invalid frequency specification: "{}".'\
-                            .format(freq)
+                        .format(freq)
                     raise ValueError(message)
             self.freq_timedelta = freq_timedelta
             self.data, self.estimated = self._import_interval(records)
@@ -376,7 +384,7 @@ class ConsumptionData(object):
             if pulse_value is None or pulse_value <= 0:
                 # incorrectly configured
                 message = 'Expected pulse_value to be a positive float, '\
-                        'but got {} instead.'.format(pulse_value)
+                    'but got {} instead.'.format(pulse_value)
                 raise ValueError(message)
             self.freq_timedelta = None
             self.data, self.estimated = self._import_pulse(records)
@@ -407,16 +415,16 @@ class ConsumptionData(object):
         start_limit = sorted_records[0].get(key)
         end_limit = sorted_records[-1].get(key)
         dt_index = pd.date_range(start=start_limit, end=end_limit,
-                freq=self.freq)
+                                 freq=self.freq)
 
         # shift index back if the keys given are end dates.
         if key == "end":
             dt_index -= self.freq_timedelta
 
         data = pd.Series(np.tile(np.nan, dt_index.shape),
-                index=dt_index)
+                         index=dt_index)
         estimated = pd.Series(np.tile(False, dt_index.shape),
-                index=dt_index)
+                              index=dt_index)
         for record in sorted_records:
             dt = record.get(key)
             value = record.get("value")
@@ -433,7 +441,7 @@ class ConsumptionData(object):
                 current_value = None
             if current_value is None:
                 message = "Ignoring misaligned data point:"\
-                    " (data[{}] = {})".format(dt,value)
+                    " (data[{}] = {})".format(dt, value)
                 warn(message)
             elif pd.isnull(current_value):
                 data[dt] = value
@@ -441,7 +449,7 @@ class ConsumptionData(object):
                     estimated[dt] = True
             else:
                 message = "Ignoring overlapping data point:"\
-                    " (data[{}] = {})".format(dt,value)
+                    " (data[{}] = {})".format(dt, value)
                 warn(message)
         return data, estimated
 
@@ -452,7 +460,7 @@ class ConsumptionData(object):
             sorted_records = sorted(records, key=lambda x: x["start"])
         except KeyError:
             message = 'Records must all have a "start" key and an'\
-                    ' "end" key.'
+                ' "end" key.'
             raise ValueError(message)
         start_datetimes = []
         values = []
@@ -465,12 +473,12 @@ class ConsumptionData(object):
             estimated = record.get("estimated")
             if start is None or end is None:
                 message = 'Records must all have a "start" key and an'\
-                        ' "end" key.'
+                    ' "end" key.'
                 raise ValueError(message)
             else:
                 if start >= end:
                     message = 'Record start must be earlier than end:'\
-                            '{} >= {}.'.format(start,end)
+                        '{} >= {}.'.format(start, end)
                     raise ValueError(message)
             if previous_end_datetime is None or\
                     start == previous_end_datetime:
@@ -480,10 +488,10 @@ class ConsumptionData(object):
                 estimateds.append(bool(estimated))
             elif start < previous_end_datetime:
                 message = 'Skipping overlapping record: '\
-                        'start ({}) < previous end ({})'\
-                        .format(start,previous_end_datetime)
+                    'start ({}) < previous end ({})'\
+                    .format(start, previous_end_datetime)
                 warn(message)
-            else: # start > previous_end_datetime:
+            else:  # start > previous_end_datetime:
                 start_datetimes.append(previous_end_datetime)
                 values.append(np.nan)
                 estimateds.append(False)
@@ -546,9 +554,9 @@ class ConsumptionData(object):
         # insert start value to if first record has a start date
         first_start = sorted_records[0].get("start")
         if first_start is not None:
-            end_datetimes.insert(0,first_start)
-            values.insert(0,sorted_records[0].get("value"))
-            estimateds.insert(0,bool(sorted_records[0].get("estimated")))
+            end_datetimes.insert(0, first_start)
+            values.insert(0, sorted_records[0].get("value"))
+            estimateds.insert(0, bool(sorted_records[0].get("estimated")))
         values.append(np.nan)
         estimateds.append(False)
         dt_index = pd.DatetimeIndex(end_datetimes)
@@ -566,10 +574,10 @@ class ConsumptionData(object):
             raise ValueError(message)
         pulses = [r.get("pulse") for r in sorted_records]
         estimateds = [bool(r.get("estimated")) for r in sorted_records]
-        values = np.tile(float(self.pulse_value),(len(pulses),))
-        values[0] = np.nan # the first pulse is treated as the first start
+        values = np.tile(float(self.pulse_value), (len(pulses),))
+        values[0] = np.nan  # the first pulse is treated as the first start
         dt_index = pd.DatetimeIndex(pulses)
-        data = pd.Series(values,index=dt_index)
+        data = pd.Series(values, index=dt_index)
         estimated = pd.Series(estimateds, index=dt_index)
         return data, estimated
 
@@ -603,7 +611,7 @@ class ConsumptionData(object):
         if self.freq_timedelta is None:
             # ignore last period which is NaN and acting as an end point
             periods = [Period(start, end) for start, end in
-                       zip(self.data.index,self.data.index[1:])]
+                       zip(self.data.index, self.data.index[1:])]
             return periods
         else:
             periods = [Period(dt, dt + self.freq_timedelta)
@@ -623,17 +631,17 @@ class ConsumptionData(object):
         if self.freq_timedelta is None:
             # ignore last period which is NaN and acting as an end point
             avgs, n_days = [], []
-            for v, ns in zip(self.data,np.diff(self.data.index)):
+            for v, ns in zip(self.data, np.diff(self.data.index)):
                 # nanoseconds to days
-                days = ns.astype('d')/8.64e13
-                avgs.append(v/days)
+                days = ns.astype('d') / 8.64e13
+                avgs.append(v / days)
                 n_days.append(days)
             return np.array(avgs), np.array(n_days)
         else:
-            days = self.freq_timedelta.days + self.freq_timedelta.seconds/8.64e4
+            days = self.freq_timedelta.days + self.freq_timedelta.seconds / 8.64e4
             avgs, n_days = [], []
             for v in self.data:
-                avgs.append(v/days)
+                avgs.append(v / days)
                 n_days.append(days)
             return np.array(avgs), np.array(n_days)
 
@@ -668,7 +676,7 @@ class ConsumptionData(object):
             return 0
         else:
             tdelta = period.timedelta
-            return tdelta.days + tdelta.seconds/8.64e4
+            return tdelta.days + tdelta.seconds / 8.64e4
 
     def records(self, record_type="arbitrary"):
         """ Records representing this data (in the format of input records).
@@ -692,7 +700,9 @@ class ConsumptionData(object):
                     "estimated": bool(est),
                 })
         elif record_type in ["arbitrary", "billing"]:
-            for s, e, v, est in zip(self.data.index, self.data.index[1:], self.data, self.estimated):
+            for s, e, v, est in zip(
+                self.data.index, self.data.index[
+                    1:], self.data, self.estimated):
                 records.append({
                     "start": s.to_datetime(),
                     "end": e.to_datetime(),
@@ -712,7 +722,9 @@ class ConsumptionData(object):
                 "value": np.nan,
                 "estimated": False,
             })
-            for e, v, est in zip(self.data.index[1:], self.data, self.estimated):
+            for e, v, est in zip(
+                self.data.index[
+                    1:], self.data, self.estimated):
                 records.append({
                     "end": e.to_datetime(),
                     "value": v,
@@ -725,11 +737,14 @@ class ConsumptionData(object):
                 })
 
             shape = (self.data.values.shape[0] - 1,)
-            if len(records) > 1 and not all(self.data.values[1:] == \
-                    np.tile(self.data.values[1], shape)):
+            if len(records) > 1 and not all(
+                self.data.values[
+                    1:] == np.tile(
+                    self.data.values[1],
+                    shape)):
                 message = 'record_type="pulse" implies that all values' \
-                        ' should be the same, but they are not: {}'\
-                        .format(self.data.values)
+                    ' should be the same, but they are not: {}'\
+                    .format(self.data.values)
                 warn(message)
         else:
             message = "Unsupported record_type: {}".format(record_type)
@@ -767,11 +782,11 @@ class ConsumptionData(object):
             filtered_data.iloc[-1] = np.nan
             filtered_estimated.iloc[-1] = np.nan
         filtered_consumption_data = ConsumptionData(
-                records=None,
-                fuel_type=self.fuel_type,
-                unit_name=self.unit_name,
-                data=filtered_data,
-                estimated=filtered_estimated)
+            records=None,
+            fuel_type=self.fuel_type,
+            unit_name=self.unit_name,
+            data=filtered_data,
+            estimated=filtered_estimated)
         return filtered_consumption_data
 
     def json(self):
@@ -788,7 +803,7 @@ class ConsumptionData(object):
 
     def __repr__(self):
         string = "ConsumptionData({}, {})\n".format(self.fuel_type,
-                self.unit_name)
+                                                    self.unit_name)
         string += self.data.__repr__()
         return string
 
@@ -811,14 +826,13 @@ class ConsumptionData(object):
                 if timedelta < target_period:
 
                     # Found a short period. Need to resample.
-                    consumption_resampled = ConsumptionData([],
-                            self.fuel_type, self.unit_name,
-                            record_type="arbitrary")
+                    consumption_resampled = ConsumptionData(
+                        [], self.fuel_type, self.unit_name, record_type="arbitrary")
                     consumption_resampled.data = self.data.resample(freq).sum()
-                    consumption_resampled.estimated = self.estimated.resample(freq).median().astype(bool)
+                    consumption_resampled.estimated = self.estimated.resample(
+                        freq).median().astype(bool)
                     return consumption_resampled
 
         # Periods are all greater than or equal to downsample target, so just
         # return copy of self.
         return copy.deepcopy(self)
-

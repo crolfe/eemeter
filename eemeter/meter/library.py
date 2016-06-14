@@ -10,6 +10,7 @@ from itertools import chain
 import numpy as np
 import pandas as pd
 
+
 class TemperatureSensitivityParameterOptimizationMeter(MeterBase):
     """Optimizes temperature senstivity parameter choices.
 
@@ -23,12 +24,12 @@ class TemperatureSensitivityParameterOptimizationMeter(MeterBase):
 
     def __init__(self, temperature_unit_str, model, **kwargs):
         super(TemperatureSensitivityParameterOptimizationMeter,
-                self).__init__(**kwargs)
+              self).__init__(**kwargs)
         self.temperature_unit_str = temperature_unit_str
         self.model = model
 
     def evaluate_raw(self, consumption_data, weather_source,
-            energy_unit_str, **kwargs):
+                     energy_unit_str, **kwargs):
         """Run optimization of temperature sensitivity parameters given a
         observed consumption data, and observed temperature data.
 
@@ -53,19 +54,24 @@ class TemperatureSensitivityParameterOptimizationMeter(MeterBase):
               period (weights)
         """
         average_daily_usages, n_days = \
-                consumption_data.average_daily_consumptions()
+            consumption_data.average_daily_consumptions()
         periods = consumption_data.periods()
-        observed_daily_temps = weather_source.daily_temperatures(periods,
-                self.temperature_unit_str)
+        observed_daily_temps = weather_source.daily_temperatures(
+            periods, self.temperature_unit_str)
 
-        params = self.model.fit(observed_daily_temps, average_daily_usages, weights=n_days)
+        params = self.model.fit(
+            observed_daily_temps,
+            average_daily_usages,
+            weights=n_days)
 
-        estimated_daily_usages = self.model.transform(observed_daily_temps, params)
+        estimated_daily_usages = self.model.transform(
+            observed_daily_temps, params)
 
         return {"temp_sensitivity_params": params,
                 "average_daily_usages": average_daily_usages,
                 "estimated_average_daily_usages": estimated_daily_usages,
                 "n_days": n_days}
+
 
 class AnnualizedUsageMeter(MeterBase):
     """Weather normalizes modeled usage for an annualized estimate of
@@ -80,12 +86,12 @@ class AnnualizedUsageMeter(MeterBase):
     """
 
     def __init__(self, temperature_unit_str, model, **kwargs):
-        super(AnnualizedUsageMeter,self).__init__(**kwargs)
+        super(AnnualizedUsageMeter, self).__init__(**kwargs)
         self.temperature_unit_str = temperature_unit_str
         self.model = model
 
     def evaluate_raw(self, model_params,
-            weather_normal_source, **kwargs):
+                     weather_normal_source, **kwargs):
         """Evaluates the annualized usage metric given a particular set of
         model parameters and a weather normal source.
 
@@ -105,11 +111,13 @@ class AnnualizedUsageMeter(MeterBase):
               sensitivity parameters and weather normals.
         """
         daily_temps = weather_normal_source.annual_daily_temperatures(
-                self.temperature_unit_str)
-        average_daily_usage_estimate = self.model.transform(daily_temps, model_params)
+            self.temperature_unit_str)
+        average_daily_usage_estimate = self.model.transform(
+            daily_temps, model_params)
 
         annualized_usage = average_daily_usage_estimate * 365
         return {"annualized_usage": annualized_usage}
+
 
 class GrossSavingsMeter(MeterBase):
     """Calculates savings due to an efficiency retrofit or ECM for a particular
@@ -124,13 +132,13 @@ class GrossSavingsMeter(MeterBase):
     """
 
     def __init__(self, model, temperature_unit_str,
-            **kwargs):
+                 **kwargs):
         super(GrossSavingsMeter, self).__init__(**kwargs)
         self.model = model
         self.temperature_unit_str = temperature_unit_str
 
     def evaluate_raw(self, model_params_baseline, consumption_data_reporting,
-            weather_source, energy_unit_str, **kwargs):
+                     weather_source, energy_unit_str, **kwargs):
         """Evaluates the gross savings metric.
 
         Parameters
@@ -153,14 +161,18 @@ class GrossSavingsMeter(MeterBase):
             - "gross_savings": Total cumulative savings over reporting period.
         """
         consumption_periods = consumption_data_reporting.periods()
-        consumption_reporting = consumption_data_reporting.to(energy_unit_str)[:-1]
+        consumption_reporting = consumption_data_reporting.to(energy_unit_str)[
+            :-1]
         observed_daily_temps = weather_source.daily_temperatures(
-                consumption_periods, self.temperature_unit_str)
-        consumption_estimates_baseline = self.model.transform( observed_daily_temps, model_params_baseline)
-        consumption_estimates_baseline *= np.array([p.timedelta.days for p in consumption_periods])
+            consumption_periods, self.temperature_unit_str)
+        consumption_estimates_baseline = self.model.transform(
+            observed_daily_temps, model_params_baseline)
+        consumption_estimates_baseline *= np.array(
+            [p.timedelta.days for p in consumption_periods])
         gross_savings = np.nansum(consumption_estimates_baseline -
-                consumption_reporting)
+                                  consumption_reporting)
         return {"gross_savings": gross_savings}
+
 
 class AnnualizedGrossSavingsMeter(MeterBase):
     """Annualized gross savings accumulated since the completion of a retrofit
@@ -176,13 +188,13 @@ class AnnualizedGrossSavingsMeter(MeterBase):
     """
 
     def __init__(self, model, temperature_unit_str, **kwargs):
-        super(AnnualizedGrossSavingsMeter,self).__init__(**kwargs)
+        super(AnnualizedGrossSavingsMeter, self).__init__(**kwargs)
         self.model = model
         self.temperature_unit_str = temperature_unit_str
 
     def evaluate_raw(self, model_params_baseline,
-            model_params_reporting, consumption_data_reporting,
-            weather_normal_source, **kwargs):
+                     model_params_reporting, consumption_data_reporting,
+                     weather_normal_source, **kwargs):
         """Evaluates the annualized gross savings metric.
 
         Parameters
@@ -210,20 +222,22 @@ class AnnualizedGrossSavingsMeter(MeterBase):
 
         meter = AnnualizedUsageMeter(self.temperature_unit_str, self.model)
         annualized_consumption_baseline = meter.evaluate_raw(
-                model_params=model_params_baseline,
-                weather_normal_source=weather_normal_source)["annualized_usage"]
+            model_params=model_params_baseline,
+            weather_normal_source=weather_normal_source)["annualized_usage"]
         annualized_consumption_reporting = meter.evaluate_raw(
-                model_params=model_params_reporting,
-                weather_normal_source=weather_normal_source)["annualized_usage"]
+            model_params=model_params_reporting,
+            weather_normal_source=weather_normal_source)["annualized_usage"]
         annualized_avoided_consumption = annualized_consumption_baseline - \
-                annualized_consumption_reporting
-        n_years = consumption_data_reporting.total_days()/365.
+            annualized_consumption_reporting
+        n_years = consumption_data_reporting.total_days() / 365.
         annualized_gross_savings = n_years * annualized_avoided_consumption
         return {"annualized_gross_savings": annualized_gross_savings}
+
 
 class TimeSpanMeter(MeterBase):
     """Meters the time span (in days) of a ConsumptionData instance.
     """
+
     def __init__(self, **kwargs):
         super(TimeSpanMeter, self).__init__(**kwargs)
 
@@ -241,7 +255,8 @@ class TimeSpanMeter(MeterBase):
         out : dict
             - "time_span": the number of days covered by the consumption data.
         """
-        return { "time_span": consumption_data.total_days() }
+        return {"time_span": consumption_data.total_days()}
+
 
 class TotalHDDMeter(MeterBase):
     """Sums the total heating degree days observed over the course of a
@@ -254,8 +269,9 @@ class TotalHDDMeter(MeterBase):
     temperature_unit_str : {"degF", "degC"}
         A string denoting the temperature unit to be used.
     """
-    def __init__(self,base,temperature_unit_str,**kwargs):
-        super(TotalHDDMeter,self).__init__(**kwargs)
+
+    def __init__(self, base, temperature_unit_str, **kwargs):
+        super(TotalHDDMeter, self).__init__(**kwargs)
         self.base = base
         self.temperature_unit_str = temperature_unit_str
 
@@ -278,8 +294,9 @@ class TotalHDDMeter(MeterBase):
         """
         consumption_periods = consumption_data.periods()
         hdd = weather_source.hdd(consumption_periods,
-                self.temperature_unit_str, self.base)
-        return { "total_hdd": sum(hdd) }
+                                 self.temperature_unit_str, self.base)
+        return {"total_hdd": sum(hdd)}
+
 
 class TotalCDDMeter(MeterBase):
     """Sums the total cooling degree days observed over the course of a
@@ -292,13 +309,14 @@ class TotalCDDMeter(MeterBase):
     temperature_unit_str : {"degF", "degC"}
         A string denoting the temperature unit to be used.
     """
+
     def __init__(self, base, temperature_unit_str, **kwargs):
-        super(TotalCDDMeter,self).__init__(**kwargs)
+        super(TotalCDDMeter, self).__init__(**kwargs)
         self.base = base
         self.temperature_unit_str = temperature_unit_str
 
     def evaluate_raw(self, consumption_data, weather_source,
-            **kwargs):
+                     **kwargs):
         """Sums the total observed CDD over a consumption history.
 
         Parameters
@@ -317,8 +335,8 @@ class TotalCDDMeter(MeterBase):
         """
         consumption_periods = consumption_data.periods()
         cdd = weather_source.cdd(consumption_periods,
-                self.temperature_unit_str, self.base)
-        return { "total_cdd": sum(cdd) }
+                                 self.temperature_unit_str, self.base)
+        return {"total_cdd": sum(cdd)}
 
 
 class NormalAnnualHDD(MeterBase):
@@ -331,8 +349,9 @@ class NormalAnnualHDD(MeterBase):
     temperature_unit_str : {"degF", "degC"}
         A string denoting the temperature unit to be used.
     """
+
     def __init__(self, base, temperature_unit_str, **kwargs):
-        super(NormalAnnualHDD,self).__init__(**kwargs)
+        super(NormalAnnualHDD, self).__init__(**kwargs)
         self.base = base
         self.temperature_unit_str = temperature_unit_str
 
@@ -352,10 +371,11 @@ class NormalAnnualHDD(MeterBase):
               during a typical meteorological year
         """
         # year of this annual period will be ignored
-        annual_period = Period(datetime(2013,1,1), datetime(2014,1,1))
+        annual_period = Period(datetime(2013, 1, 1), datetime(2014, 1, 1))
         hdd = weather_normal_source.hdd(annual_period,
-                self.temperature_unit_str, self.base)
-        return { "normal_annual_hdd": hdd }
+                                        self.temperature_unit_str, self.base)
+        return {"normal_annual_hdd": hdd}
+
 
 class NormalAnnualCDD(MeterBase):
     """Sums the total cooling degree days observed in a normal year.
@@ -367,8 +387,9 @@ class NormalAnnualCDD(MeterBase):
     temperature_unit_str : {"degF", "degC"}
         A string denoting the temperature unit to be used.
     """
+
     def __init__(self, base, temperature_unit_str, **kwargs):
-        super(NormalAnnualCDD,self).__init__(**kwargs)
+        super(NormalAnnualCDD, self).__init__(**kwargs)
         self.base = base
         self.temperature_unit_str = temperature_unit_str
 
@@ -388,10 +409,11 @@ class NormalAnnualCDD(MeterBase):
               during a typical meteorological year
         """
 
-        annual_period = Period(datetime(2013,1,1), datetime(2014,1,1))
+        annual_period = Period(datetime(2013, 1, 1), datetime(2014, 1, 1))
         cdd = weather_normal_source.cdd(annual_period,
-                self.temperature_unit_str, self.base)
-        return { "normal_annual_cdd": cdd }
+                                        self.temperature_unit_str, self.base)
+        return {"normal_annual_cdd": cdd}
+
 
 class NPeriodsMeetingHDDPerDayThreshold(MeterBase):
     """Counts the number of periods meeting a particular heating degree day
@@ -410,9 +432,10 @@ class NPeriodsMeetingHDDPerDayThreshold(MeterBase):
         A proportion multiplier for the number of hdd; defualt is 1.
         E.g. period_hdd <= proportion * hdd:
     """
+
     def __init__(self, base, temperature_unit_str, operation, proportion=1,
-            **kwargs):
-        super(NPeriodsMeetingHDDPerDayThreshold,self).__init__(**kwargs)
+                 **kwargs):
+        super(NPeriodsMeetingHDDPerDayThreshold, self).__init__(**kwargs)
         self.base = base
         self.temperature_unit_str = temperature_unit_str
         self.operation = operation
@@ -440,7 +463,7 @@ class NPeriodsMeetingHDDPerDayThreshold(MeterBase):
         n_periods = 0
         periods = consumption_data.periods()
         hdds = weather_source.hdd(periods, self.temperature_unit_str,
-                self.base, per_day=True)
+                                  self.base, per_day=True)
         for period_hdd in hdds:
             if self.operation == "<":
                 if period_hdd < self.proportion * hdd:
@@ -455,6 +478,7 @@ class NPeriodsMeetingHDDPerDayThreshold(MeterBase):
                 if period_hdd >= self.proportion * hdd:
                     n_periods += 1
         return {"n_periods": n_periods}
+
 
 class NPeriodsMeetingCDDPerDayThreshold(MeterBase):
     """Counts the number of periods meeting a particular cooling degree day
@@ -473,16 +497,17 @@ class NPeriodsMeetingCDDPerDayThreshold(MeterBase):
         A proportion multiplier for the number of cdd; defualt is 1.
         E.g. period_cdd <= proportion * cdd:
     """
+
     def __init__(self, base, temperature_unit_str, operation, proportion=1,
-            **kwargs):
-        super(NPeriodsMeetingCDDPerDayThreshold,self).__init__(**kwargs)
+                 **kwargs):
+        super(NPeriodsMeetingCDDPerDayThreshold, self).__init__(**kwargs)
         self.base = base
         self.temperature_unit_str = temperature_unit_str
         self.operation = operation
         self.proportion = proportion
 
     def evaluate_raw(self, consumption_data, cdd, weather_source,
-            **kwargs):
+                     **kwargs):
         """Evaluates the number of periods meeting a consumption history limit
         according to data from a particular weather source.
 
@@ -504,7 +529,7 @@ class NPeriodsMeetingCDDPerDayThreshold(MeterBase):
         n_periods = 0
         periods = consumption_data.periods()
         cdds = weather_source.cdd(periods, self.temperature_unit_str,
-                self.base, per_day=True)
+                                  self.base, per_day=True)
         for period_cdd in cdds:
             if self.operation == "<":
                 if period_cdd < self.proportion * cdd:
@@ -520,6 +545,7 @@ class NPeriodsMeetingCDDPerDayThreshold(MeterBase):
                     n_periods += 1
         return {"n_periods": n_periods}
 
+
 class RecentReadingMeter(MeterBase):
     """ Finds the number of days since the most recent reading.
 
@@ -528,6 +554,7 @@ class RecentReadingMeter(MeterBase):
     n_days : int
         The target number of days since the most recent reading.
     """
+
     def __init__(self, **kwargs):
         super(RecentReadingMeter, self).__init__(**kwargs)
 
@@ -551,18 +578,19 @@ class RecentReadingMeter(MeterBase):
         """
         if consumption_data.data.shape[0] > 0:
             reverse_data = consumption_data.data[::-1]
-            for i,val in reverse_data.iteritems():
+            for i, val in reverse_data.iteritems():
                 if not pd.isnull(val) and not consumption_data.estimated[i]:
                     n_days = (reverse_data.index[0] - i).days
                     return {"n_days": n_days}
-        return {"n_days": np.inf }
+        return {"n_days": np.inf}
+
 
 class AverageDailyUsage(MeterBase):
     """Computes average daily usage given consumption.
     """
 
     def evaluate_raw(self, consumption_data, energy_unit_str,
-            **kwargs):
+                     **kwargs):
         """Compute the average daily usage for each consumption of
         a particular fuel type.
 
@@ -580,8 +608,9 @@ class AverageDailyUsage(MeterBase):
               same length as the consumption_data instance.
         """
         average_daily_consumptions, _ = \
-                consumption_data.average_daily_consumptions()
+            consumption_data.average_daily_consumptions()
         return {"average_daily_usages": average_daily_consumptions}
+
 
 class EstimatedAverageDailyUsage(MeterBase):
     """Computes estmiated average daily usage given consumption, a model, and
@@ -596,12 +625,12 @@ class EstimatedAverageDailyUsage(MeterBase):
     """
 
     def __init__(self, temperature_unit_str, model, **kwargs):
-        super(EstimatedAverageDailyUsage,self).__init__(**kwargs)
+        super(EstimatedAverageDailyUsage, self).__init__(**kwargs)
         self.temperature_unit_str = temperature_unit_str
         self.model = model
 
     def evaluate_raw(self, consumption_data, weather_source,
-            temp_sensitivity_params, **kwargs):
+                     temp_sensitivity_params, **kwargs):
         """Compute the average daily usage for each consumption of
         a particular fuel type.
 
@@ -623,13 +652,15 @@ class EstimatedAverageDailyUsage(MeterBase):
             - "n_days": the number of days in each consumption period.
         """
         periods = consumption_data.periods()
-        observed_daily_temps = weather_source.daily_temperatures(periods,
-                self.temperature_unit_str)
+        observed_daily_temps = weather_source.daily_temperatures(
+            periods, self.temperature_unit_str)
         n_days = np.array([len(temps) for temps in observed_daily_temps])
         estimated_average_daily_usages = \
-                self.model.transform( observed_daily_temps, temp_sensitivity_params)
-        return {"estimated_average_daily_usages": estimated_average_daily_usages,
-                "n_days": n_days}
+            self.model.transform(observed_daily_temps, temp_sensitivity_params)
+        return {
+            "estimated_average_daily_usages": estimated_average_daily_usages,
+            "n_days": n_days}
+
 
 class ConsumptionDataAttributes(MeterBase):
     """ Outputs the attributes of the ConsumptionData object passed in.
@@ -668,6 +699,7 @@ class ConsumptionDataAttributes(MeterBase):
         }
         return attributes
 
+
 class ProjectAttributes(MeterBase):
     """ Outputs the attributes of the Project object passed in.
     """
@@ -702,6 +734,7 @@ class ProjectAttributes(MeterBase):
         }
         return attributes
 
+
 class ProjectConsumptionDataBaselineReporting(MeterBase):
     """ Splits project consumption data by period and fuel.
     """
@@ -724,13 +757,13 @@ class ProjectConsumptionDataBaselineReporting(MeterBase):
 
         for c in project.consumption:
             baseline_consumption_data = \
-                    c.filter_by_period(project.baseline_period)
+                c.filter_by_period(project.baseline_period)
             baseline_data = {
                 "value": baseline_consumption_data,
                 "tags": [c.fuel_type, "baseline"]
             }
             reporting_consumption_data = \
-                    c.filter_by_period(project.reporting_period)
+                c.filter_by_period(project.reporting_period)
             reporting_data = {
                 "value": reporting_consumption_data,
                 "tags": [c.fuel_type, "reporting"]
@@ -738,7 +771,8 @@ class ProjectConsumptionDataBaselineReporting(MeterBase):
             consumption.append(baseline_data)
             consumption.append(reporting_data)
 
-        return { "consumption": consumption }
+        return {"consumption": consumption}
+
 
 class ProjectFuelTypes(MeterBase):
     """
@@ -761,10 +795,10 @@ class ProjectFuelTypes(MeterBase):
         """
         fuel_types = []
         for c in project.consumption:
-            fuel_type = { "value": c.fuel_type, "tags": [ c.fuel_type ] }
+            fuel_type = {"value": c.fuel_type, "tags": [c.fuel_type]}
             fuel_types.append(fuel_type)
 
-        return { "fuel_types": fuel_types }
+        return {"fuel_types": fuel_types}
 
 
 class DownsampleConsumption(MeterBase):
@@ -799,4 +833,4 @@ class DownsampleConsumption(MeterBase):
 
         consumption_downsampled = consumption_data.downsample(self.freq)
 
-        return { "consumption_downsampled": consumption_downsampled }
+        return {"consumption_downsampled": consumption_downsampled}

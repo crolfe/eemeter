@@ -1,6 +1,7 @@
 from unittest import TestCase
 from eemeter.uploader import Requester
 
+
 class TestRequester(TestCase):
 
     @classmethod

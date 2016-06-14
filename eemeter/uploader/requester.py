@@ -1,6 +1,7 @@
 import requests
 import os
 
+
 class Requester(object):
     """Makes datastore API requests.
 
@@ -50,7 +51,7 @@ class Requester(object):
             raise ValueError(message)
 
         if datastore_url[-1] == "/":
-            return datastore_url [:-1]
+            return datastore_url[:-1]
         else:
             return datastore_url
 

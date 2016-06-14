@@ -5,6 +5,7 @@ from eemeter.uploader.uploaders import ProjectAttributeUploader
 from eemeter.uploader.uploaders import ProjectAttributeKeyUploader
 from eemeter.uploader.uploaders import ConsumptionMetadataUploader
 
+
 class TestProjectUploader(TestCase):
 
     @classmethod

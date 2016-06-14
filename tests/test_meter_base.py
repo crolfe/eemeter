@@ -14,16 +14,19 @@ import json
 
 import pytest
 
+
 @pytest.fixture
 def data_container_name_value():
     value = DataContainer(name="name", value="value", tags=["tag"])
     return value
+
 
 @pytest.fixture
 def data_collection(data_container_name_value):
     dc = DataCollection()
     dc.add_data(data_container_name_value)
     return dc
+
 
 def test_data_container(data_container_name_value):
     assert data_container_name_value.name == "name"
@@ -33,37 +36,43 @@ def test_data_container(data_container_name_value):
     data_container_name_value.set_value("value1")
     assert data_container_name_value.get_value() == "value1"
 
-    assert type(data_container_name_value.tags) == frozenset
+    assert isinstance(data_container_name_value.tags, frozenset)
     assert "tag" in data_container_name_value.tags
+
 
 def test_data_container_init_tag_type_errors():
     with pytest.raises(TypeError):
         DataContainer(name="name", value="value", tags="tag")
 
+
 def test_data_collection_init_tag_type_errors():
     with pytest.raises(TypeError):
         DataCollection(tags="tag")
+
 
 def test_data_container_add_tags(data_container_name_value):
     assert data_container_name_value.tags == frozenset(["tag"])
 
     data_container_name_value.add_tags(["tag1"])
 
-    assert data_container_name_value.tags == frozenset(["tag","tag1"])
+    assert data_container_name_value.tags == frozenset(["tag", "tag1"])
 
     with pytest.raises(TypeError):
         data_container_name_value.add_tags("tag2")
 
+
 def test_data_collection_add_tags(data_collection):
     assert data_collection.get_data("name").tags == frozenset(["tag"])
     data_collection.add_tags(["tag1"])
-    assert data_collection.get_data("name").tags == frozenset(["tag","tag1"])
+    assert data_collection.get_data("name").tags == frozenset(["tag", "tag1"])
 
     with pytest.raises(TypeError):
         data_collection.add_tags("tag2")
 
+
 def test_data_collection_count(data_collection):
     assert data_collection.count() == 1
+
 
 def test_data_collection_get_data(data_collection):
     assert data_collection.get_data("name").name == "name"
@@ -74,22 +83,28 @@ def test_data_collection_get_data(data_collection):
     with pytest.raises(TypeError):
         data_collection.get_data("name", "tag2")
 
+
 def test_data_collection_add_data(data_collection):
     # before
-    assert data_collection.get_data("new_data") == None
+    assert data_collection.get_data("new_data") is None
 
     # add new data
-    new_data = DataContainer("new_data", value="new_data_value", tags=["new_tag"])
+    new_data = DataContainer(
+        "new_data",
+        value="new_data_value",
+        tags=["new_tag"])
     data_collection.add_data(new_data)
 
     # after
     assert data_collection.get_data("new_data").name == "new_data"
     assert data_collection.get_data("new_data").value == "new_data_value"
-    assert data_collection.get_data("new_data", tags=["new_tag"]).name == "new_data"
-    assert data_collection.get_data("new_data", tags=["bad_tag"]) == None
+    assert data_collection.get_data(
+        "new_data", tags=["new_tag"]).name == "new_data"
+    assert data_collection.get_data("new_data", tags=["bad_tag"]) is None
 
     with pytest.raises(TypeError):
         data_collection.get_data("new_data", "tag2")
+
 
 def test_data_collection_add_overlapping_data(data_collection):
     # before
@@ -107,13 +122,15 @@ def test_data_collection_add_overlapping_data(data_collection):
 
     assert data_collection.get_data("name", tags=["tag1"]).name == "name"
 
+
 def test_data_collection_add_data_collection(data_collection):
     dc = DataCollection()
     new_data = DataContainer("name", "new_data_value", ["tag1"])
     dc.add_data(new_data)
-    data_collection.add_data_collection(dc,tagspace=["tagspace"])
+    data_collection.add_data_collection(dc, tagspace=["tagspace"])
 
-    assert data_collection.get_data("name", tags=["tag1","tagspace"]).name == "name"
+    assert data_collection.get_data(
+        "name", tags=["tag1", "tagspace"]).name == "name"
 
     with pytest.raises(TypeError):
         data_collection.add_data_collection("name", "tagspace")
@@ -128,12 +145,14 @@ def test_data_collection_search(data_collection):
     assert data_collection.search("name", tags=["dag"]).count() == 0
     assert data_collection.search("name", tags=["tag", "dag"]).count() == 1
 
+
 def test_data_collection_filter_by_tag(data_collection):
     assert data_collection.filter_by_tag(["tag"]).count() == 1
-    assert data_collection.filter_by_tag(["tag","tag1"]).count() == 0
+    assert data_collection.filter_by_tag(["tag", "tag1"]).count() == 0
     assert data_collection.filter_by_tag(["tag1"]).count() == 0
     assert data_collection.filter_by_tag([]).count() == 1
     assert data_collection.filter_by_tag(None).count() == 1
+
 
 def test_insufficient_query(data_collection):
     new_data = DataContainer("name", "new_data_value", ["tag1"])
@@ -144,21 +163,25 @@ def test_insufficient_query(data_collection):
         data_collection.get_data("name")
         assert "Ambiguous criteria:" in e.message
 
+
 def test_data_collection_iteritems(data_collection):
     for item in data_collection.iteritems():
         assert item.name == "name"
 
+
 def test_data_collection_copy(data_collection):
-    for item1,item2 in zip(data_collection.iteritems(),
-            data_collection.copy().iteritems()):
+    for item1, item2 in zip(data_collection.iteritems(),
+                            data_collection.copy().iteritems()):
         assert item1.name == item2.name
+
 
 def test_data_collection_creation_shortcut():
     dc = DataCollection(item1="item1_value", item2="item2_value", tags=["tag"])
-    assert dc.get_data("item1",tags=["tag"]).name == "item1"
-    assert dc.get_data("item1",tags=["tag"]).value == "item1_value"
-    assert dc.get_data("item2",tags=["tag"]).name == "item2"
-    assert dc.get_data("item2",tags=["tag"]).value == "item2_value"
+    assert dc.get_data("item1", tags=["tag"]).name == "item1"
+    assert dc.get_data("item1", tags=["tag"]).value == "item1_value"
+    assert dc.get_data("item2", tags=["tag"]).name == "item2"
+    assert dc.get_data("item2", tags=["tag"]).value == "item2_value"
+
 
 def test_data_container_json_value():
     d1 = DataContainer(name="name", value="value")
@@ -172,19 +195,28 @@ def test_data_container_json_value():
     assert d2.get_value()[0] == 0
     assert d2.get_value(json_serializable=True)[0] == 0
 
-    assert type(d3.get_value()) == pd.DataFrame
+    assert isinstance(d3.get_value(), pd.DataFrame)
     with pytest.raises(TypeError):
         d3.get_value(json_serializable=True)
 
+
 def test_data_collection_json():
-    dc1 = DataCollection(item1="item1_value", item2="item2_value", tags=["tag1"])
-    dc1.add_data_collection(DataCollection(item1="item1_value", item2="item2_value", tags=["tag2"]))
+    dc1 = DataCollection(
+        item1="item1_value",
+        item2="item2_value",
+        tags=["tag1"])
+    dc1.add_data_collection(
+        DataCollection(
+            item1="item1_value",
+            item2="item2_value",
+            tags=["tag2"]))
     json_data = dc1.json()
     json.dumps(json_data)
     assert len(json_data["item1"]) == 2
     assert len(json_data["item2"]) == 2
     assert json_data["item1"][0]["value"] == "item1_value"
     assert json_data["item1"][0]["tags"] in [["tag1"], ["tag2"]]
+
 
 def test_dummy_meter(data_collection):
     meter_yaml = """
@@ -198,7 +230,8 @@ def test_dummy_meter(data_collection):
     result = meter.evaluate(data_collection)
 
     assert result.get_data(name="result").value == "value"
-    assert result.get_data(name="name") == None
+    assert result.get_data(name="name") is None
+
 
 def test_dummy_meter_output_duplication_list(data_collection):
     meter_yaml = """
@@ -218,7 +251,7 @@ def test_dummy_meter_output_duplication_list(data_collection):
 
     assert result.get_data(name="result1").value == "value"
     assert result.get_data(name="result2").value == "value"
-    assert result.get_data(name="name") == None
+    assert result.get_data(name="name") is None
 
 
 def test_dummy_meter_tags(data_collection):
@@ -244,10 +277,11 @@ def test_dummy_meter_tags(data_collection):
     result = meter.evaluate(data_collection)
 
     assert result.get_data("result_1").value == "value"
-    assert result.get_data("result_1",tags=["tag_1"]).value == "value"
-    assert result.get_data("result_1",tags=["tag"]) == None
-    assert result.get_data("result") == None
-    assert result.get_data(name="name") == None
+    assert result.get_data("result_1", tags=["tag_1"]).value == "value"
+    assert result.get_data("result_1", tags=["tag"]) is None
+    assert result.get_data("result") is None
+    assert result.get_data(name="name") is None
+
 
 def test_dummy_meter_auxiliary_inputs():
     meter_yaml = """
@@ -262,6 +296,7 @@ def test_dummy_meter_auxiliary_inputs():
     result = meter.evaluate(data_collection)
 
     assert result.get_data(name="result").value == "aux"
+
 
 def test_dummy_meter_auxiliary_outputs(data_collection):
     meter_yaml = """

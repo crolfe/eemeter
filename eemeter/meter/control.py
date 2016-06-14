@@ -13,6 +13,7 @@ from .base import MeterBase
 from eemeter.meter import DataCollection
 from eemeter.meter import DataContainer
 
+
 class Sequence(MeterBase):
     """Collects and returns a series of meter object evaluation outputs in
     sequence, making the outputs of each meter available to those that
@@ -27,9 +28,9 @@ class Sequence(MeterBase):
     """
 
     def __init__(self, sequence, **kwargs):
-        super(Sequence,self).__init__(**kwargs)
+        super(Sequence, self).__init__(**kwargs)
         assert all([issubclass(meter.__class__, MeterBase)
-                for meter in sequence])
+                    for meter in sequence])
         self.sequence = sequence
 
     def evaluate(self, data_collection):
@@ -48,6 +49,7 @@ class Sequence(MeterBase):
             input_data_collection.add_data_collection(meter_result)
             output_data_collection.add_data_collection(meter_result)
         return output_data_collection
+
 
 class Condition(MeterBase):
     """Collects and returns a series of meter object evaluation outputs in
@@ -98,6 +100,7 @@ class Condition(MeterBase):
         else:
             return meter.evaluate(data_collection)
 
+
 class Switch(MeterBase):
     """Switches between cases of values of a particular parameter.
 
@@ -120,6 +123,7 @@ class Switch(MeterBase):
         The meter to exectute if the value of the parameter was not found in
         the dictionary of cases.
     """
+
     def __init__(self, target, cases, default=None, **kwargs):
         super(Switch, self).__init__(**kwargs)
         self.target = target
@@ -146,6 +150,7 @@ class Switch(MeterBase):
                 meter = self.default
         output_data_collection = meter.evaluate(data_collection)
         return output_data_collection
+
 
 class For(MeterBase):
     """ Operates like a python-style for loop, looping over parameters to feed
@@ -225,11 +230,11 @@ class For(MeterBase):
         for i in data_collection.get_data(**self.iterable).value:
             variable_name = self.variable["name"]
             variable_value = i.get("value")
-            variable_tags = self.variable.get("tags",[])
+            variable_tags = self.variable.get("tags", [])
             data_container = DataContainer(
-                    name=variable_name,
-                    value=variable_value,
-                    tags=variable_tags)
+                name=variable_name,
+                value=variable_value,
+                tags=variable_tags)
 
             input_data_collection = data_collection.copy()
             input_data_collection.add_data(data_container)
@@ -240,6 +245,7 @@ class For(MeterBase):
             outputs.add_tags(tags)
             output_data_collection.add_data_collection(outputs)
         return output_data_collection
+
 
 class TagFilter(MeterBase):
     """ Filters input data to match tag criteria.
@@ -290,7 +296,7 @@ class TagFilter(MeterBase):
         data_filter = self.get_tags(data_collection)
         input_data_collection = data_collection.filter_by_tag(data_filter)
         mapped_input_dict = self._dict_from_data_collection(self.input_mapping,
-                data_collection)
+                                                            data_collection)
         for name, value in mapped_input_dict.items():
             input_data_collection.add_data(DataContainer(name, value))
 
@@ -298,6 +304,7 @@ class TagFilter(MeterBase):
         output_data_collection = self.meter.evaluate(input_data_collection)
 
         return output_data_collection
+
 
 class FuelTypeTagFilter(TagFilter):
 
@@ -323,4 +330,3 @@ class FuelTypeTagFilter(TagFilter):
         """
         tags = [data_collection.get_data(self.fuel_type_search_name).value]
         return tags
-

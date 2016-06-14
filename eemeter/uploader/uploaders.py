@@ -18,13 +18,11 @@ class BaseUploader(object):
 
         if read_response.status_code != 200:
             message = "Read error GET ({}): {}\n{}".format(
-                    read_response.status_code, url, read_response.text)
+                read_response.status_code, url, read_response.text)
             raise ValueError(message)
 
         for item_status in read_response.json():
             print(item_status)
-
-
 
     def sync(self, data):
         response_data, created = self.get_or_create(data)
@@ -55,7 +53,7 @@ class BaseUploader(object):
 
         if read_response.status_code != 200:
             message = "Read error GET ({}): {}\n{}".format(
-                    read_response.status_code, urls["read"], read_response.text)
+                read_response.status_code, urls["read"], read_response.text)
             raise ValueError(message)
 
         read_response_data = read_response.json()
@@ -66,12 +64,13 @@ class BaseUploader(object):
 
             if create_response.status_code != 201:
                 message = "Create error POST ({}): {}\n{}\n{}".format(
-                        create_response.status_code, urls["create"], data, create_response.text)
+                    create_response.status_code, urls["create"], data, create_response.text)
                 raise ValueError(message)
 
             create_response_data = create_response.json()
             if self.many:
-                pks = [response_data["id"] for response_data in create_response_data]
+                pks = [response_data["id"]
+                       for response_data in create_response_data]
             else:
                 pk = create_response_data["id"]
 
@@ -79,7 +78,7 @@ class BaseUploader(object):
 
                 if self.many:
                     print("Created {} ({}, pks={})".format(self.item_name,
-                                                          descriptor, pks))
+                                                           descriptor, pks))
                 else:
                     print("Created {} ({}, pk={})".format(self.item_name,
                                                           descriptor, pk))
@@ -118,7 +117,6 @@ class BaseUploader(object):
 
     def get_sync_url(self, data):
         raise NotImplementedError
-
 
     def should_update(self, data, response_data):
         """
@@ -205,7 +203,8 @@ class ProjectUploader(BaseUploader):
         return data["project_id"]
 
     def get_read_url(self, data):
-        return constants.PROJECT_URL + "?project_id={}".format(data["project_id"])
+        return constants.PROJECT_URL + \
+            "?project_id={}".format(data["project_id"])
 
     def get_create_url(self, data):
         return constants.PROJECT_URL

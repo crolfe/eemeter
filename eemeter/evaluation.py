@@ -9,6 +9,7 @@ class Period:
     end : datetime.datetime or None, default None
         The end date of the Period.
     """
+
     def __init__(self, start=None, end=None, name=None):
         self.start = start
         self.end = end
@@ -29,7 +30,7 @@ class Period:
     def __str__(self):
         return "Period({} - {})".format(self.start, self.end)
 
-    def __contains__(self,key):
+    def __contains__(self, key):
         if self.start is None and self.end is None:
             return True
         elif self.start is None and self.end is not None:

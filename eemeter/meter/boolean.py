@@ -1,5 +1,6 @@
 from .base import MeterBase
 
+
 class And(MeterBase):
     """Performs an AND operation on input parameters and returns the result.
 
@@ -9,6 +10,7 @@ class And(MeterBase):
         Must contain the names of boolean parameters which must all be True
         in order for the output to be true.
     """
+
     def __init__(self, inputs, **kwargs):
         super(And, self).__init__(**kwargs)
         if len(inputs) == 0:
@@ -35,6 +37,7 @@ class And(MeterBase):
             output = output and boolean
         return {"output": output}
 
+
 class Or(MeterBase):
     """Performs an OR operation on input parameters and returns the result.
 
@@ -44,6 +47,7 @@ class Or(MeterBase):
         Must contain the names of boolean parameters at least one of which must
         be True in order for the output to be true.
     """
+
     def __init__(self, inputs, **kwargs):
         super(Or, self).__init__(**kwargs)
         if len(inputs) == 0:

@@ -13,6 +13,7 @@ zipcode_to_climate_zone_index = None
 climate_zone_to_stations_index = None
 climate_zone_to_zipcodes_index = None
 
+
 def _get_json_resource(filename):
     with resource_stream('eemeter.resources', filename) as f:
         resource = json.loads(f.read().decode('utf-8'))
@@ -22,52 +23,66 @@ def _get_json_resource(filename):
 def _load_station_to_lat_lng_index():
     global station_to_lat_lng_index
     if station_to_lat_lng_index is None:
-        station_to_lat_lng_index = _get_json_resource('usaf_station_lat_long.json')
+        station_to_lat_lng_index = _get_json_resource(
+            'usaf_station_lat_long.json')
     return station_to_lat_lng_index
+
 
 def _load_station_to_zipcodes_index():
     global station_to_zipcodes_index
     if station_to_zipcodes_index is None:
-        station_to_zipcodes_index = _get_json_resource('usaf_station_zipcodes.json')
+        station_to_zipcodes_index = _get_json_resource(
+            'usaf_station_zipcodes.json')
     return station_to_zipcodes_index
+
 
 def _load_station_to_climate_zone_index():
     global station_to_climate_zone_index
     if station_to_climate_zone_index is None:
-        station_to_climate_zone_index = _get_json_resource('usaf_station_climate_zone.json')
+        station_to_climate_zone_index = _get_json_resource(
+            'usaf_station_climate_zone.json')
     return station_to_climate_zone_index
 
 
 def _load_zipcode_to_lat_lng_index():
     global zipcode_to_lat_lng_index
     if zipcode_to_lat_lng_index is None:
-        zipcode_to_lat_lng_index = _get_json_resource('zipcode_centroid_lat_long.json')
+        zipcode_to_lat_lng_index = _get_json_resource(
+            'zipcode_centroid_lat_long.json')
     return zipcode_to_lat_lng_index
+
 
 def _load_zipcode_to_station_index():
     global zipcode_to_station_index
     if zipcode_to_station_index is None:
-        zipcode_to_station_index = _get_json_resource('zipcode_usaf_station.json')
+        zipcode_to_station_index = _get_json_resource(
+            'zipcode_usaf_station.json')
     return zipcode_to_station_index
+
 
 def _load_zipcode_to_climate_zone_index():
     global zipcode_to_climate_zone_index
     if zipcode_to_climate_zone_index is None:
-        zipcode_to_climate_zone_index = _get_json_resource('zipcode_climate_zone.json')
+        zipcode_to_climate_zone_index = _get_json_resource(
+            'zipcode_climate_zone.json')
     return zipcode_to_climate_zone_index
 
 
 def _load_climate_zone_to_zipcodes_index():
     global climate_zone_to_zipcodes_index
     if climate_zone_to_zipcodes_index is None:
-        climate_zone_to_zipcodes_index = _get_json_resource('climate_zone_zipcodes.json')
+        climate_zone_to_zipcodes_index = _get_json_resource(
+            'climate_zone_zipcodes.json')
     return climate_zone_to_zipcodes_index
+
 
 def _load_climate_zone_to_stations_index():
     global climate_zone_to_stations_index
     if climate_zone_to_stations_index is None:
-        climate_zone_to_stations_index = _get_json_resource('climate_zone_usaf_stations.json')
+        climate_zone_to_stations_index = _get_json_resource(
+            'climate_zone_usaf_stations.json')
     return climate_zone_to_stations_index
+
 
 def haversine(lat1, lng1, lat2, lng2):
     """ Calculate the great circle distance between two points
@@ -95,10 +110,11 @@ def haversine(lat1, lng1, lat2, lng2):
     # haversine formula
     dlng = lng2 - lng1
     dlat = lat2 - lat1
-    a = np.sin(dlat/2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlng/2)**2
+    a = np.sin(dlat / 2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlng / 2)**2
     c = 2 * np.arcsin(np.sqrt(a))
-    r = 6371 # Radius of earth in kilometers. Use 3956 for miles
+    r = 6371  # Radius of earth in kilometers. Use 3956 for miles
     return c * r
+
 
 def lat_lng_to_station(lat, lng):
     """Return the closest USAF station ID using latitude and
@@ -121,8 +137,9 @@ def lat_lng_to_station(lat, lng):
     station_to_lat_lng_index = _load_station_to_lat_lng_index()
     index_list = list(station_to_lat_lng_index.items())
     dists = [haversine(lat, lng, stat_lat, stat_lng)
-            for _, (stat_lat, stat_lng) in index_list]
+             for _, (stat_lat, stat_lng) in index_list]
     return index_list[np.argmin(dists)][0]
+
 
 def lat_lng_to_zipcode(lat, lng):
     """Return the closest ZIP code using latitude and
@@ -147,8 +164,9 @@ def lat_lng_to_zipcode(lat, lng):
     zipcode_to_lat_lng_index = _load_zipcode_to_lat_lng_index()
     index_list = list(zipcode_to_lat_lng_index.items())
     dists = [haversine(lat, lng, zip_lat, zip_lng)
-            for _, (zip_lat, zip_lng) in index_list]
+             for _, (zip_lat, zip_lng) in index_list]
     return index_list[np.argmin(dists)][0]
+
 
 def station_to_lat_lng(station):
     """Return the latitude and longitude coordinates of the given station.
@@ -169,6 +187,7 @@ def station_to_lat_lng(station):
         return None, None
     return lat_lng
 
+
 def station_to_zipcodes(station):
     """Return the zipcodes that map to this station.
 
@@ -185,6 +204,7 @@ def station_to_zipcodes(station):
     """
     return _load_station_to_zipcodes_index().get(station)
 
+
 def station_to_climate_zone(station):
     """Return the climate_zone of the station.
 
@@ -200,6 +220,7 @@ def station_to_climate_zone(station):
 
     """
     return _load_station_to_climate_zone_index().get(station)
+
 
 def zipcode_to_lat_lng(zipcode):
     """Return the latitude and longitude centroid of a particular ZIP code.
@@ -220,6 +241,7 @@ def zipcode_to_lat_lng(zipcode):
         return None, None
     return lat_lng
 
+
 def zipcode_to_station(zipcode):
     """Return the nearest USAF station (by latitude and longitude centroid) of
     the ZIP code.
@@ -235,6 +257,7 @@ def zipcode_to_station(zipcode):
         String representing a USAF Weather station ID
     """
     return _load_zipcode_to_station_index().get(zipcode)
+
 
 def zipcode_to_climate_zone(zipcode):
     """Return the climate zone of the ZIP code (by latitude and longitude
@@ -252,6 +275,7 @@ def zipcode_to_climate_zone(zipcode):
     """
     return _load_zipcode_to_climate_zone_index().get(zipcode)
 
+
 def climate_zone_to_zipcodes(climate_zone):
     """Return ZIP codes with centroids in the given climate zone.
 
@@ -267,6 +291,7 @@ def climate_zone_to_zipcodes(climate_zone):
     """
     return _load_climate_zone_to_zipcodes_index().get(climate_zone)
 
+
 def climate_zone_to_stations(climate_zone):
     """Return weather stations falling within in the given climate zone.
 
@@ -281,6 +306,7 @@ def climate_zone_to_stations(climate_zone):
         Strings representing USAF station ids.
     """
     return _load_climate_zone_to_stations_index().get(climate_zone)
+
 
 class Location(object):
     """ Represents a project location. Should be initialized with one of

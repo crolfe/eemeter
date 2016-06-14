@@ -6,6 +6,7 @@ from eemeter.meter import DataCollection
 
 import pytest
 
+
 def test_sequential_meter():
     meter_yaml = """
         !obj:eemeter.meter.Sequence {
@@ -34,8 +35,9 @@ def test_sequential_meter():
     assert result.get_data("result").value == 10
     assert result.get_data("result1").value == 10
 
+
 def test_conditional_meter():
-    meter_yaml="""
+    meter_yaml = """
         !obj:eemeter.meter.Condition {
             condition: {
                 "name": "electricity_present"
@@ -53,14 +55,17 @@ def test_conditional_meter():
     meter = load(meter_yaml)
 
     data_collection = DataCollection(electricity_present=True,
-            success="success", failure="failure")
-    assert meter.evaluate(data_collection).get_data("result").value == "success"
+                                     success="success", failure="failure")
+    assert meter.evaluate(data_collection).get_data(
+        "result").value == "success"
     data_collection = DataCollection(electricity_present=False,
-            success="success", failure="failure")
-    assert meter.evaluate(data_collection).get_data("result").value == "failure"
+                                     success="success", failure="failure")
+    assert meter.evaluate(data_collection).get_data(
+        "result").value == "failure"
+
 
 def test_conditional_meter_without_params():
-    meter_yaml="""
+    meter_yaml = """
         !obj:eemeter.meter.Condition {
             condition: {
                 "name": "electricity_present",
@@ -72,6 +77,7 @@ def test_conditional_meter_without_params():
     assert meter.evaluate(data_collection).count() == 0
     data_collection = DataCollection(electricity_present=False)
     assert meter.evaluate(data_collection).count() == 0
+
 
 def test_switch():
     meter_yaml = """
@@ -101,19 +107,19 @@ def test_switch():
     meter = load(meter_yaml)
 
     data_collection = DataCollection(target=1, value_one=1, value_two=2,
-            value_three=3, value_default=4)
+                                     value_three=3, value_default=4)
     result1 = meter.evaluate(data_collection)
     data_collection = DataCollection(target=2, value_one=1, value_two=2,
-            value_three=3, value_default=4)
+                                     value_three=3, value_default=4)
     result2 = meter.evaluate(data_collection)
     data_collection = DataCollection(target=3, value_one=1, value_two=2,
-            value_three=3, value_default=4)
+                                     value_three=3, value_default=4)
     result3 = meter.evaluate(data_collection)
     data_collection = DataCollection(target=4, value_one=1, value_two=2,
-            value_three=3, value_default=4)
+                                     value_three=3, value_default=4)
     result4 = meter.evaluate(data_collection)
     data_collection = DataCollection(value_one=1, value_two=2, value_three=3,
-            value_default=4)
+                                     value_default=4)
     result5 = meter.evaluate(data_collection)
 
     assert 1 == result1.get_data("result").value
@@ -121,6 +127,7 @@ def test_switch():
     assert 3 == result3.get_data("result").value
     assert 4 == result4.get_data("result").value
     assert None == result5.get_data("result")
+
 
 def test_for():
     meter_yaml = """
@@ -150,6 +157,7 @@ def test_for():
     assert 1 == result.get_data("result", tags=["one"]).value
     assert 2 == result.get_data("result", tags=["two"]).value
 
+
 def test_tag_filter():
     meter_yaml = """
         !obj:eemeter.meter.TagFilter {
@@ -165,6 +173,7 @@ def test_tag_filter():
 
     with pytest.raises(NotImplementedError):
         meter.evaluate(data_collection)
+
 
 def test_fuel_type_tag_filter():
     meter_yaml = """
@@ -196,8 +205,12 @@ def test_fuel_type_tag_filter():
     data_collection = DataCollection(active_fuel_type="electricity")
     data_collection_include = DataCollection(value="value_include")
     data_collection_exclude = DataCollection(value="value_exclude")
-    data_collection.add_data_collection(data_collection_include, tagspace=["electricity"])
-    data_collection.add_data_collection(data_collection_exclude, tagspace=["natural_gas"])
+    data_collection.add_data_collection(
+        data_collection_include,
+        tagspace=["electricity"])
+    data_collection.add_data_collection(
+        data_collection_exclude,
+        tagspace=["natural_gas"])
 
     output_data_collection = meter.evaluate(data_collection)
     assert output_data_collection.get_data("result1").value == "electricity"

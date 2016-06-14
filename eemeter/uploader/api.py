@@ -16,7 +16,13 @@ __all__ = [
 ]
 
 
-def upload_dicts(project_dict, consumption_dict, url, access_token, project_owner, verbose=True):
+def upload_dicts(
+        project_dict,
+        consumption_dict,
+        url,
+        access_token,
+        project_owner,
+        verbose=True):
     """Uploads a set of formatted project and consumption data formatted as
     dicts to a datastore instance.
 
@@ -69,10 +75,22 @@ def upload_dicts(project_dict, consumption_dict, url, access_token, project_owne
     project_df, consumption_df = _dicts_to_dataframes(project_dict,
                                                       consumption_dict)
 
-    upload_dataframes(project_df, consumption_df, url, access_token, project_owner, verbose)
+    upload_dataframes(
+        project_df,
+        consumption_df,
+        url,
+        access_token,
+        project_owner,
+        verbose)
 
 
-def upload_csvs(project_csv_file, consumption_csv_file, url, access_token, project_owner, verbose=True):
+def upload_csvs(
+        project_csv_file,
+        consumption_csv_file,
+        url,
+        access_token,
+        project_owner,
+        verbose=True):
     """Uploads a set of formatted project and consumption data formatted as
     CSVs to a datastore instance.
 
@@ -101,9 +119,22 @@ def upload_csvs(project_csv_file, consumption_csv_file, url, access_token, proje
     project_df, consumption_df = _csvs_to_dataframes(project_csv_file,
                                                      consumption_csv_file)
 
-    upload_dataframes(project_df, consumption_df, url, access_token, project_owner, verbose)
+    upload_dataframes(
+        project_df,
+        consumption_df,
+        url,
+        access_token,
+        project_owner,
+        verbose)
 
-def upload_dataframes2(project_df, consumption_df, url, access_token, project_owner, verbose=True):
+
+def upload_dataframes2(
+        project_df,
+        consumption_df,
+        url,
+        access_token,
+        project_owner,
+        verbose=True):
     """Uploads a set of formatted project and consumption data formatted as
     CSVs to a datastore instance.
 
@@ -129,11 +160,15 @@ def upload_dataframes2(project_df, consumption_df, url, access_token, project_ow
         Whether or not to output a log of progress.
     """
     requester = Requester(url, access_token)
-    project_attribute_key_uploader = uploaders.ProjectAttributeKeyUploader(requester, verbose)
+    project_attribute_key_uploader = uploaders.ProjectAttributeKeyUploader(
+        requester, verbose)
     project_uploader = uploaders.ProjectUploader(requester, verbose)
-    project_attribute_uploader = uploaders.ProjectAttributeUploader(requester, verbose)
-    consumption_metadata_uploader = uploaders.ConsumptionMetadataUploader(requester, verbose)
-    consumption_record_uploader = uploaders.ConsumptionRecordUploader(requester, verbose)
+    project_attribute_uploader = uploaders.ProjectAttributeUploader(
+        requester, verbose)
+    consumption_metadata_uploader = uploaders.ConsumptionMetadataUploader(
+        requester, verbose)
+    consumption_record_uploader = uploaders.ConsumptionRecordUploader(
+        requester, verbose)
 
     # project attribute keys
     project_attribute_keys_data = _get_project_attribute_keys_data(project_df)
@@ -142,7 +177,7 @@ def upload_dataframes2(project_df, consumption_df, url, access_token, project_ow
         # sync the project attribute keys
         response_data = project_attribute_key_uploader.sync(data)
 
-        data.update(response_data) # adds the "id" field
+        data.update(response_data)  # adds the "id" field
 
     project_ids = {}
     for project_data, project_attributes_data in \
@@ -152,7 +187,8 @@ def upload_dataframes2(project_df, consumption_df, url, access_token, project_ow
         project_data["project_owner"] = project_owner
         project_response_data = project_uploader.sync(project_data)
 
-        # store project_id to speed things up a bit in the consumption data uploading
+        # store project_id to speed things up a bit in the consumption data
+        # uploading
         project_id = project_response_data["project_id"]
         project_pk = project_response_data["id"]
         project_ids[project_pk] = project_id
@@ -163,7 +199,8 @@ def upload_dataframes2(project_df, consumption_df, url, access_token, project_ow
             project_attribute_data["project"] = project_pk
 
             # sync the project attribute
-            project_attribute_data = project_attribute_uploader.sync(project_attribute_data)
+            project_attribute_data = project_attribute_uploader.sync(
+                project_attribute_data)
 
     for consumption_metadata_data, consumption_records_data in \
             _get_consumption_data(consumption_df):
@@ -181,17 +218,24 @@ def upload_dataframes2(project_df, consumption_df, url, access_token, project_ow
             project_response_data = project_uploader.sync(project_data)
             consumption_metadata_data["project"] = project_response_data["id"]
 
-
-        consumption_metadata_response_data = consumption_metadata_uploader.sync(consumption_metadata_data)
+        consumption_metadata_response_data = consumption_metadata_uploader.sync(
+            consumption_metadata_data)
         consumption_metadata_id = consumption_metadata_response_data["id"]
 
         for consumption_record_data in consumption_records_data:
             consumption_record_data["metadata"] = consumption_metadata_id
 
-        consumption_records_response_data = consumption_record_uploader.bulk_sync(consumption_records_data)
+        consumption_records_response_data = consumption_record_uploader.bulk_sync(
+            consumption_records_data)
 
 
-def upload_dataframes(project_df, consumption_df, url, access_token, project_owner, verbose=True):
+def upload_dataframes(
+        project_df,
+        consumption_df,
+        url,
+        access_token,
+        project_owner,
+        verbose=True):
     """Uploads a set of formatted project and consumption data formatted as
     CSVs to a datastore instance.
 
@@ -217,11 +261,15 @@ def upload_dataframes(project_df, consumption_df, url, access_token, project_own
         Whether or not to output a log of progress.
     """
     requester = Requester(url, access_token)
-    project_attribute_key_uploader = uploaders.ProjectAttributeKeyUploader(requester, verbose)
+    project_attribute_key_uploader = uploaders.ProjectAttributeKeyUploader(
+        requester, verbose)
     project_uploader = uploaders.ProjectUploader(requester, verbose)
-    project_attribute_uploader = uploaders.ProjectAttributeUploader(requester, verbose)
-    consumption_metadata_uploader = uploaders.ConsumptionMetadataUploader(requester, verbose)
-    consumption_record_uploader = uploaders.ConsumptionRecordUploader(requester, verbose)
+    project_attribute_uploader = uploaders.ProjectAttributeUploader(
+        requester, verbose)
+    consumption_metadata_uploader = uploaders.ConsumptionMetadataUploader(
+        requester, verbose)
+    consumption_record_uploader = uploaders.ConsumptionRecordUploader(
+        requester, verbose)
 
     # project attribute keys
     project_attribute_keys_data = _get_project_attribute_keys_data(project_df)
@@ -230,7 +278,7 @@ def upload_dataframes(project_df, consumption_df, url, access_token, project_own
         # sync the project attribute keys
         response_data = project_attribute_key_uploader.sync(data)
 
-        data.update(response_data) # adds the "id" field
+        data.update(response_data)  # adds the "id" field
 
     project_ids = {}
     for project_data, project_attributes_data in \
@@ -240,7 +288,8 @@ def upload_dataframes(project_df, consumption_df, url, access_token, project_own
         project_data["project_owner"] = project_owner
         project_response_data = project_uploader.sync(project_data)
 
-        # store project_id to speed things up a bit in the consumption data uploading
+        # store project_id to speed things up a bit in the consumption data
+        # uploading
         project_id = project_response_data["project_id"]
         project_pk = project_response_data["id"]
         project_ids[project_pk] = project_id
@@ -251,7 +300,8 @@ def upload_dataframes(project_df, consumption_df, url, access_token, project_own
             project_attribute_data["project"] = project_pk
 
             # sync the project attribute
-            project_attribute_data = project_attribute_uploader.sync(project_attribute_data)
+            project_attribute_data = project_attribute_uploader.sync(
+                project_attribute_data)
 
     for consumption_metadata_data, consumption_records_data in \
             _get_consumption_data(consumption_df):
@@ -269,14 +319,15 @@ def upload_dataframes(project_df, consumption_df, url, access_token, project_own
             project_response_data = project_uploader.sync(project_data)
             consumption_metadata_data["project"] = project_response_data["id"]
 
-
-        consumption_metadata_response_data = consumption_metadata_uploader.sync(consumption_metadata_data)
+        consumption_metadata_response_data = consumption_metadata_uploader.sync(
+            consumption_metadata_data)
         consumption_metadata_id = consumption_metadata_response_data["id"]
 
         for consumption_record_data in consumption_records_data:
             consumption_record_data["metadata"] = consumption_metadata_id
 
-        consumption_records_response_data = consumption_record_uploader.sync(consumption_records_data)
+        consumption_records_response_data = consumption_record_uploader.sync(
+            consumption_records_data)
 
 
 def _dicts_to_dataframes(project_dict, consumption_dict):
@@ -284,14 +335,18 @@ def _dicts_to_dataframes(project_dict, consumption_dict):
     consumption_df = pd.DataFrame(consumption_dict)
     return project_df, consumption_df
 
+
 def _csvs_to_dataframes(project_csv, consumption_csv):
     project_df = pd.read_csv(project_csv)
-    project_df.baseline_period_end = pd.to_datetime(project_df.baseline_period_end)
-    project_df.reporting_period_start = pd.to_datetime(project_df.reporting_period_start)
+    project_df.baseline_period_end = pd.to_datetime(
+        project_df.baseline_period_end)
+    project_df.reporting_period_start = pd.to_datetime(
+        project_df.reporting_period_start)
     consumption_df = pd.read_csv(consumption_csv)
     consumption_df.start = pd.to_datetime(consumption_df.start)
     consumption_df.end = pd.to_datetime(consumption_df.end)
     return project_df, consumption_df
+
 
 def _get_project_attribute_keys_data(project_df):
 
@@ -302,7 +357,8 @@ def _get_project_attribute_keys_data(project_df):
             continue
 
         if column_name in constants.STANDARD_PROJECT_ATTRIBUTE_KEYS:
-            project_attribute_key = constants.STANDARD_PROJECT_ATTRIBUTE_KEYS[column_name]
+            project_attribute_key = constants.STANDARD_PROJECT_ATTRIBUTE_KEYS[
+                column_name]
             project_attribute_key_data = {
                 "name": project_attribute_key["name"],
                 "display_name": project_attribute_key["display_name"],
@@ -310,11 +366,12 @@ def _get_project_attribute_keys_data(project_df):
             }
         else:
             project_attribute_key_data = _infer_project_attribute_key_data(
-                    column_name, project_df[column_name])
+                column_name, project_df[column_name])
 
         project_attribute_keys_data.append(project_attribute_key_data)
 
     return project_attribute_keys_data
+
 
 def _infer_project_attribute_key_data(column_name, column):
     project_attribute_key_data = {
@@ -323,6 +380,7 @@ def _infer_project_attribute_key_data(column_name, column):
         "data_type": _infer_data_type(column),
     }
     return project_attribute_key_data
+
 
 def _infer_data_type(column):
     if column.shape[0] == 0:
@@ -347,14 +405,17 @@ def _infer_data_type(column):
     else:
         return None
 
+
 def _infer_display_name(column_name):
     # first standardize to underscored_column_name
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', column_name)
     underscored = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
     # then convert to Not Underscored Column Name
-    display_name = " ".join([ str.capitalize(w) for w in underscored.split("_")])
+    display_name = " ".join([str.capitalize(w)
+                             for w in underscored.split("_")])
     return display_name
+
 
 def _get_project_data(project_df, project_attribute_keys_data):
     for i, row in project_df.iterrows():
@@ -365,17 +426,21 @@ def _get_project_data(project_df, project_attribute_keys_data):
             "latitude": row.latitude,
             "longitude": row.longitude,
             "baseline_period_start": None,
-            "baseline_period_end": pytz.UTC.localize(row.baseline_period_end).strftime("%Y-%m-%dT%H:%M:%S%z"),
-            "reporting_period_start": pytz.UTC.localize(row.reporting_period_start).strftime("%Y-%m-%dT%H:%M:%S%z"),
+            "baseline_period_end": pytz.UTC.localize(
+                row.baseline_period_end).strftime("%Y-%m-%dT%H:%M:%S%z"),
+            "reporting_period_start": pytz.UTC.localize(
+                row.reporting_period_start).strftime("%Y-%m-%dT%H:%M:%S%z"),
             "reporting_period_end": None,
         }
 
         project_attributes_data = []
         for project_attribute_key_data in project_attribute_keys_data:
-            project_attribute_data = _get_project_attribute_data(row, project_attribute_key_data)
+            project_attribute_data = _get_project_attribute_data(
+                row, project_attribute_key_data)
             project_attributes_data.append(project_attribute_data)
 
         yield project_data, project_attributes_data
+
 
 def _get_project_attribute_data(row, project_attribute_key_data):
 
@@ -405,9 +470,12 @@ def _get_project_attribute_data(row, project_attribute_key_data):
 
     return project_attribute_data
 
+
 def _get_consumption_data(consumption_df):
-    for project_id, project_consumption in consumption_df.groupby("project_id"):
-        for fuel_type, fuel_type_consumption in project_consumption.groupby("fuel_type"):
+    for project_id, project_consumption in consumption_df.groupby(
+            "project_id"):
+        for fuel_type, fuel_type_consumption in project_consumption.groupby(
+                "fuel_type"):
             unique_unit_names = fuel_type_consumption.unit_name.unique()
             assert unique_unit_names.shape[0] == 1
 
@@ -417,16 +485,18 @@ def _get_consumption_data(consumption_df):
                 "energy_unit": constants.ENERGY_UNIT[unique_unit_names[0]],
             }
             consumption_records_data = _get_consumption_records_data(
-                    fuel_type_consumption)
+                fuel_type_consumption)
 
             yield consumption_metadata_data, consumption_records_data
 
+
 def _get_consumption_records_data(consumption_df):
     raw_consumption_records_data = _get_raw_consumption_records_data(
-            consumption_df)
+        consumption_df)
     consumption_records_data = _process_raw_consumption_records_data(
-            raw_consumption_records_data)
+        raw_consumption_records_data)
     return consumption_records_data
+
 
 def _get_raw_consumption_records_data(consumption_df):
     raw_consumption_records_data = []
@@ -440,6 +510,7 @@ def _get_raw_consumption_records_data(consumption_df):
         raw_consumption_records_data.append(consumption_record_data)
     return raw_consumption_records_data
 
+
 def _process_raw_consumption_records_data(records):
 
     # dumb hack - the fuel_type and unit_name are actually just placeholders
@@ -450,12 +521,10 @@ def _process_raw_consumption_records_data(records):
                                        record_type="arbitrary")
 
     consumption_records_data = []
-    for (d1, value), (d2, estimated) in zip(consumption_data.data.iteritems(), consumption_data.estimated.iteritems()):
+    for (d1, value), (d2, estimated) in zip(
+            consumption_data.data.iteritems(), consumption_data.estimated.iteritems()):
         assert d1 == d2
-        record = {
-            "start": pytz.UTC.localize(d1.to_datetime()).strftime("%Y-%m-%dT%H:%M:%S%z"),
-            "value": value,
-            "estimated": bool(estimated),
-        }
+        record = {"start": pytz.UTC.localize(d1.to_datetime()).strftime(
+            "%Y-%m-%dT%H:%M:%S%z"), "value": value, "estimated": bool(estimated), }
         consumption_records_data.append(record)
     return consumption_records_data

@@ -9,7 +9,8 @@ try:
     unicode = unicode
 except NameError:
     # 'unicode' is undefined, must be Python 3
-    basestring = (str,bytes)
+    basestring = (str, bytes)
+
 
 class DataContainer:
     """ Data structure for tagged data. Associates a name and tag with a
@@ -30,7 +31,8 @@ class DataContainer:
             self.tags = frozenset(tags)
 
     def __repr__(self):
-        return "<{}:{} (tags={})>".format(self.name, self.value, list(self.tags))
+        return "<{}:{} (tags={})>".format(
+            self.name, self.value, list(self.tags))
 
     def set_value(self, value):
         """ Set the value.
@@ -46,15 +48,15 @@ class DataContainer:
                 return self.value
             except TypeError as e:
                 try:
-                    if type(self.value) == list: # for iterables
+                    if isinstance(self.value, list):  # for iterables
                         return [{
                             "value": v["value"].json(),
                             "tags": v["tags"],
                         } for v in self.value]
-                    else: # for values explicitly defining json method, e.g. parameters
+                    else:  # for values explicitly defining json method, e.g. parameters
                         return self.value.json()
                 except AttributeError:
-                    try: # for numpy arrays
+                    try:  # for numpy arrays
                         return self.value.tolist()
                     except AttributeError:
                         raise e
@@ -110,7 +112,7 @@ class DataCollection:
             self._name_index[data_container.name].append(data_container)
         else:
             message = "Element already exists in data container: {}" \
-                    .format(existing_element)
+                .format(existing_element)
             raise ValueError(message)
 
     def add_data_collection(self, data_collection, tagspace=[]):
@@ -118,11 +120,13 @@ class DataCollection:
         tags to apply before adding.
         """
         if isinstance(tagspace, string_types):
-            message = "tagspace should be a list or None, got tags={}".format(tagspace)
+            message = "tagspace should be a list or None, got tags={}".format(
+                tagspace)
             raise TypeError(message)
 
         for item in data_collection.iteritems():
-            new_item = DataContainer(item.name, item.value, item.tags | set(tagspace))
+            new_item = DataContainer(
+                item.name, item.value, item.tags | set(tagspace))
             self.add_data(new_item)
 
     def add_tags(self, tags):
@@ -161,7 +165,7 @@ class DataCollection:
             return matches[0]
         else:
             message = "Ambiguous criteria: found {} matches for" \
-                    " name={}, tags={}".format(n_matches, name, tags)
+                " name={}, tags={}".format(n_matches, name, tags)
             raise ValueError(message)
 
     def iteritems(self):
@@ -212,7 +216,7 @@ class DataCollection:
         # collect raw strings
         item_names, item_values, item_tags = [], [], []
         for item in self.iteritems():
-            item_names.append( item.name)
+            item_names.append(item.name)
             item_values.append("\n".join([
                 "    {}".format(l)
                 for l in "{!s}".format(item.value).splitlines()
@@ -283,9 +287,11 @@ class DataCollection:
 
         data_collection = DataCollection()
         for item in self.iteritems():
-            if tags == [] or tags == None or all([tag in item.tags for tag in tags]):
+            if tags == [] or tags is None or all(
+                    [tag in item.tags for tag in tags]):
                 data_collection.add_data(item)
         return data_collection
+
 
 class MeterBase(object):
     """Base class for all Meter objects. Takes care of structural tasks such as
@@ -394,8 +400,14 @@ class MeterBase(object):
 
     """
 
-    def __init__(self, input_mapping={}, output_mapping={},
-            auxiliary_inputs={}, auxiliary_outputs={}, tagspace={}, **kwargs):
+    def __init__(
+            self,
+            input_mapping={},
+            output_mapping={},
+            auxiliary_inputs={},
+            auxiliary_outputs={},
+            tagspace={},
+            **kwargs):
         self.input_mapping = input_mapping
         self.output_mapping = output_mapping
         self.auxiliary_inputs = auxiliary_inputs
@@ -413,7 +425,7 @@ class MeterBase(object):
         """
         # map inputs
         mapped_input_dict = self._dict_from_data_collection(self.input_mapping,
-                data_collection)
+                                                            data_collection)
 
         # combine auxiliary inputs with mapped inputs
         all_inputs = mapped_input_dict.copy()
@@ -426,10 +438,9 @@ class MeterBase(object):
         all_outputs = outputs_dict.copy()
         all_outputs.update(self.auxiliary_outputs)
 
-
         # map meter evaluations back to data_collection form
         mapped_output_data_collection = self._data_collection_from_dict(
-                self.output_mapping, all_outputs)
+            self.output_mapping, all_outputs)
 
         # combine with original data, add tags as necessary
         mapped_output_data_collection.add_tags(self.tagspace)
@@ -446,7 +457,7 @@ class MeterBase(object):
             target_data = data_collection.get_data(search_name, search_tags)
             if target_data is None:
                 message = "Data not found during mapping: name={}, tags={}" \
-                        .format(search_name, search_tags)
+                    .format(search_name, search_tags)
                 raise ValueError(message)
             else:
                 data_dict[target_name] = target_data.get_value()
@@ -461,10 +472,10 @@ class MeterBase(object):
             target_value = data_dict.get(result_name)
             if target_value is None:
                 message = "Data not found during mapping: {}" \
-                        .format(result_name)
+                    .format(result_name)
                 raise ValueError(message)
 
-            if type(target_data) is not list:
+            if not isinstance(target_data, list):
                 target_data = [target_data]
             for td in target_data:
                 target_name = td.get("name", result_name)
@@ -490,13 +501,14 @@ class MeterBase(object):
 
     def yaml_mapping(self):
         args = inspect.getargspec(self.__init__).args[1:]
-        mapping = { arg: getattr(self, arg) for arg in args}
+        mapping = {arg: getattr(self, arg) for arg in args}
         mapping["input_mapping"] = self.input_mapping
         mapping["output_mapping"] = self.output_mapping
         mapping["auxiliary_inputs"] = self.auxiliary_inputs
         mapping["auxiliary_outputs"] = self.auxiliary_outputs
         mapping["tagspace"] = self.tagspace
         return mapping
+
 
 class YamlDefinedMeter(MeterBase):
     """Meter type which uses yaml internally.
@@ -559,7 +571,7 @@ class YamlDefinedMeter(MeterBase):
         """This method is not used in YamlDefinedMeters.
         """
         message = "Use the meter.evaluate(data_collection) method for" \
-                "YamlDefinedMeters."
+            "YamlDefinedMeters."
         raise NotImplementedError(message)
 
     def evaluate(self, data_collection):

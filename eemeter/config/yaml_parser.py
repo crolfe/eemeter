@@ -6,6 +6,7 @@ is_initialized = False
 BaseProxy = namedtuple('BaseProxy', ['callable', 'keywords', 'yaml_src'])
 Setting = namedtuple('Setting', ['name'])
 
+
 class Proxy(BaseProxy):
 
     __slots__ = []
@@ -15,6 +16,7 @@ class Proxy(BaseProxy):
         namedtuple elements).
         """
         return hash(id(self))
+
 
 def load(stream, settings={}):
     """Load a Meter specification written in YAML format. `stream` can be a
@@ -32,6 +34,7 @@ def load(stream, settings={}):
     proxy_graph = yaml.load(string)
     return _instantiate(proxy_graph, bindings={}, settings=settings)
 
+
 def load_path(path, settings={}):
     """Load a Meter specification written in YAML format. `path` is the path
     to the yaml file.
@@ -39,6 +42,7 @@ def load_path(path, settings={}):
     with open(path, 'r') as f:
         content = ''.join(f.readlines())
     return load(content, settings=settings)
+
 
 def _instantiate_proxy_tuple(proxy, bindings, settings):
 
@@ -52,6 +56,7 @@ def _instantiate_proxy_tuple(proxy, bindings, settings):
     bindings[proxy] = obj
     return bindings[proxy]
 
+
 def _instantiate(proxy, bindings={}, settings={}):
 
     if isinstance(proxy, Proxy):
@@ -60,16 +65,19 @@ def _instantiate(proxy, bindings={}, settings={}):
             if instance.name in settings:
                 return settings[instance.name]
             else:
-                message = "{} not found in settings dict.".format(instance.name)
+                message = "{} not found in settings dict.".format(
+                    instance.name)
                 raise KeyError(message)
         else:
             return instance
     elif isinstance(proxy, dict):
-        return {k: _instantiate(v , bindings, settings) for k, v in proxy.items()}
+        return {k: _instantiate(v, bindings, settings)
+                for k, v in proxy.items()}
     elif isinstance(proxy, list):
         return [_instantiate(v, bindings, settings) for v in proxy]
     else:
         return proxy
+
 
 def try_to_import(tag_suffix):
     components = tag_suffix.split('.')
@@ -78,6 +86,7 @@ def try_to_import(tag_suffix):
     exec('import %s' % modulename)
     obj = eval(tag_suffix)
     return obj
+
 
 def initialize():
     """Add constructors to yaml parser.
@@ -91,6 +100,7 @@ def initialize():
     yaml.add_multi_representer(Model, multi_representer_obj)
 
     is_initialized = True
+
 
 def multi_constructor_obj(loader, tag_suffix, node):
     """Callback used by PyYAML when a "!obj:" tag is encountered.
@@ -108,21 +118,29 @@ def multi_constructor_obj(loader, tag_suffix, node):
 
     return proxy
 
+
 def constructor_setting(loader, node):
     """Callback used by PyYAML when a "!setting" tag is encountered.
     See PyYAML documentation for details on the call signature.
     """
     yaml_src = yaml.serialize(node)
     value = loader.construct_scalar(node)
-    proxy = Proxy(callable=Setting, keywords={"name": value}, yaml_src=yaml_src)
+    proxy = Proxy(
+        callable=Setting,
+        keywords={
+            "name": value},
+        yaml_src=yaml_src)
 
     return proxy
+
 
 def multi_representer_obj(dumper, data):
     meter_type_name = data.__module__ + "." + data.__class__.__name__
     mapping = data.yaml_mapping()
-    node = dumper.represent_mapping(u'!obj:{}'.format(meter_type_name), mapping)
+    node = dumper.represent_mapping(
+        u'!obj:{}'.format(meter_type_name), mapping)
     return node
+
 
 def dump(meter):
     return yaml.dump(meter)

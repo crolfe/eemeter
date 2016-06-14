@@ -11,10 +11,12 @@ STANDARD_PROJECT_DATA_COLUMN_NAMES = [
     "weather_station",
     "latitude",
     "longitude",
-    "baseline_period_start", # handle this specially? it won't appear in most project dataframes
+    # handle this specially? it won't appear in most project dataframes
+    "baseline_period_start",
     "baseline_period_end",
     "reporting_period_start",
-    "reporting_period_end", # handle this specially? it won't appear in most project dataframes
+    # handle this specially? it won't appear in most project dataframes
+    "reporting_period_end",
 ]
 
 STANDARD_PROJECT_ATTRIBUTE_KEYS = {

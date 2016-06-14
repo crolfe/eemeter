@@ -1,6 +1,7 @@
 from eemeter.weather import GSODWeatherSource
 from eemeter.weather import TMY3WeatherSource
 
+
 class Project(object):
     """
     Projects contain all of the elements which are needed for meters to be able
@@ -42,19 +43,19 @@ class Project(object):
     """
 
     def __init__(self, location, consumption=[], baseline_period=None,
-            reporting_period=None, other_periods=[], weather_source=None,
-            weather_normal_source=None):
+                 reporting_period=None, other_periods=[], weather_source=None,
+                 weather_normal_source=None):
         self.location = location
         self.baseline_period = baseline_period
         self.reporting_period = reporting_period
         self.other_periods = other_periods
 
-        if not type(consumption) == list:
+        if not isinstance(consumption, list):
             self.consumption = [consumption]
         else:
             self.consumption = consumption
 
-        if not type(other_periods) == list:
+        if not isinstance(other_periods, list):
             self.other_periods = [other_periods]
         else:
             self.other_periods = other_periods
@@ -89,13 +90,13 @@ class Project(object):
 
         periods = [p for p in periods if p is not None]
 
-        period_starts = [ p.start for p in periods]
+        period_starts = [p.start for p in periods]
         if None in period_starts:
             start_date = None
         else:
             start_date = min(period_starts)
 
-        period_ends = [ p.end for p in periods]
+        period_ends = [p.end for p in periods]
         if None in period_ends:
             end_date = None
         else:
@@ -107,7 +108,6 @@ class Project(object):
         (Baseline, reporting, other).
         """
         periods = self.all_periods()
-        views = [ c.filter_by_period(p) for c in self.consumption
+        views = [c.filter_by_period(p) for c in self.consumption
                  for p in periods]
         return views
-

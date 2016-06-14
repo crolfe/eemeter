@@ -1,6 +1,7 @@
 from eemeter.uploader import constants
 from unittest import TestCase
 
+
 class ConstantsTestCase(TestCase):
 
     def test_STANDARD_PROJECT_ATTRIBUTE_KEYS(self):

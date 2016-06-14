@@ -18,11 +18,13 @@ def get_example_project(zipcode):
     # location
     location = Location(zipcode=zipcode)
     station = location.station
-    weather_source = GSODWeatherSource(station,2011,2015)
+    weather_source = GSODWeatherSource(station, 2011, 2015)
 
     # model
-    model_e = AverageDailyTemperatureSensitivityModel(cooling=True, heating=True)
-    model_g = AverageDailyTemperatureSensitivityModel(cooling=False, heating=True)
+    model_e = AverageDailyTemperatureSensitivityModel(
+        cooling=True, heating=True)
+    model_g = AverageDailyTemperatureSensitivityModel(
+        cooling=False, heating=True)
 
     # model params
     params_e_b = {
@@ -50,19 +52,23 @@ def get_example_project(zipcode):
         "heating_balance_temperature": 68,
     }
 
-    #generators
+    # generators
     gen_e_b = MonthlyBillingConsumptionGenerator("electricity", "kWh", "degF",
-            model_e, params_e_b)
+                                                 model_e, params_e_b)
     gen_e_r = MonthlyBillingConsumptionGenerator("electricity", "kWh", "degF",
-            model_e, params_e_r)
-    gen_g_b = MonthlyBillingConsumptionGenerator("natural_gas", "therm", "degF",
-            model_g, params_g_b)
-    gen_g_r = MonthlyBillingConsumptionGenerator("natural_gas", "therm", "degF",
-            model_g, params_g_r)
+                                                 model_e, params_e_r)
+    gen_g_b = MonthlyBillingConsumptionGenerator(
+        "natural_gas", "therm", "degF", model_g, params_g_b)
+    gen_g_r = MonthlyBillingConsumptionGenerator(
+        "natural_gas", "therm", "degF", model_g, params_g_r)
 
     # time periods
-    period = Period(datetime(2011,1,1,tzinfo=pytz.utc), datetime(2015,1,1,tzinfo=pytz.utc))
-    datetimes = generate_monthly_billing_datetimes(period, dist=randint(30,31))
+    period = Period(
+        datetime(
+            2011, 1, 1, tzinfo=pytz.utc), datetime(
+            2015, 1, 1, tzinfo=pytz.utc))
+    datetimes = generate_monthly_billing_datetimes(
+        period, dist=randint(30, 31))
 
     # consumption data
     cd_e_b = gen_e_b.generate(weather_source, datetimes, daily_noise_dist=None)
@@ -72,13 +78,20 @@ def get_example_project(zipcode):
 
     # periods
     periods = cd_e_b.periods()
-    reporting_period = Period(datetime(2013,1,1,tzinfo=pytz.utc), datetime(2015,1,1,tzinfo=pytz.utc))
-    baseline_period = Period(datetime(2011,1,1,tzinfo=pytz.utc), datetime(2013,1,1,tzinfo=pytz.utc))
+    reporting_period = Period(
+        datetime(
+            2013, 1, 1, tzinfo=pytz.utc), datetime(
+            2015, 1, 1, tzinfo=pytz.utc))
+    baseline_period = Period(
+        datetime(
+            2011, 1, 1, tzinfo=pytz.utc), datetime(
+            2013, 1, 1, tzinfo=pytz.utc))
 
     # records
     records_e = []
     records_g = []
-    for e_b, e_r, g_b, g_r, p in zip(cd_e_b.data, cd_e_r.data, cd_g_b.data, cd_g_r.data, periods):
+    for e_b, e_r, g_b, g_r, p in zip(
+            cd_e_b.data, cd_e_r.data, cd_g_b.data, cd_g_r.data, periods):
         e = e_r if p in reporting_period else e_b
         g = g_r if p in reporting_period else g_b
         record_e = {"start": p.start, "end": p.end, "value": e}
@@ -88,12 +101,16 @@ def get_example_project(zipcode):
 
     # consumption_data
     cd_e = ConsumptionData(records_e, "electricity", "kWh",
-            record_type="arbitrary")
+                           record_type="arbitrary")
     cd_g = ConsumptionData(records_g, "natural_gas", "therm",
-            record_type="arbitrary")
+                           record_type="arbitrary")
     consumptions = [cd_e, cd_g]
 
     # project
-    project = Project(location, consumptions, baseline_period, reporting_period)
+    project = Project(
+        location,
+        consumptions,
+        baseline_period,
+        reporting_period)
 
     return project

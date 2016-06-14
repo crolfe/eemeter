@@ -11,6 +11,7 @@ ATOL = 1e-2
 
 import pytest
 
+
 def test_cvrmse():
     meter_yaml = """
         !obj:eemeter.meter.CVRMSE {
@@ -21,13 +22,14 @@ def test_cvrmse():
     meter = load(meter_yaml)
 
     data_collection = DataCollection(
-            y=np.array([12,13,414,12,23,12,32,np.nan]),
-            y_hat=np.array([32,12,322,21,22,41,32,np.nan]),
-            params=BaseloadHeatingModelParameterType([1,3,4]))
+        y=np.array([12, 13, 414, 12, 23, 12, 32, np.nan]),
+        y_hat=np.array([32, 12, 322, 21, 22, 41, 32, np.nan]),
+        params=BaseloadHeatingModelParameterType([1, 3, 4]))
     result = meter.evaluate(data_collection)
 
     assert_allclose(result.get_data("cvrmse").value, 59.79,
-            rtol=RTOL, atol=ATOL)
+                    rtol=RTOL, atol=ATOL)
+
 
 def test_rmse():
     meter_yaml = """
@@ -39,12 +41,13 @@ def test_rmse():
     meter = load(meter_yaml)
 
     data_collection = DataCollection(
-            y=np.array([12,13,414,12,23,12,32,np.nan]),
-            y_hat=np.array([32,12,322,21,22,41,32,np.nan]))
+        y=np.array([12, 13, 414, 12, 23, 12, 32, np.nan]),
+        y_hat=np.array([32, 12, 322, 21, 22, 41, 32, np.nan]))
     result = meter.evaluate(data_collection)
 
     assert_allclose(result.get_data("rmse").value, 34.97,
-            rtol=RTOL, atol=ATOL)
+                    rtol=RTOL, atol=ATOL)
+
 
 def test_r_squared():
     meter_yaml = """
@@ -56,9 +59,9 @@ def test_r_squared():
     meter = load(meter_yaml)
 
     data_collection = DataCollection(
-            y=np.array([12,13,414,12,23,12,32,np.nan]),
-            y_hat=np.array([32,12,322,21,22,41,32,np.nan]))
+        y=np.array([12, 13, 414, 12, 23, 12, 32, np.nan]),
+        y_hat=np.array([32, 12, 322, 21, 22, 41, 32, np.nan]))
     result = meter.evaluate(data_collection)
 
     assert_allclose(result.get_data("r_squared").value, 0.9276,
-            rtol=RTOL, atol=ATOL)
+                    rtol=RTOL, atol=ATOL)

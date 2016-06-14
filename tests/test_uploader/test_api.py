@@ -6,6 +6,7 @@ import pandas as pd
 from datetime import datetime
 import pytz
 
+
 class APITestCase(TestCase):
 
     def setUp(self):
@@ -44,7 +45,7 @@ class APITestCase(TestCase):
 
     def test_get_project_attribute_keys_data(self):
         project_attribute_keys_data = \
-                api._get_project_attribute_keys_data(self.minimal_project_df)
+            api._get_project_attribute_keys_data(self.minimal_project_df)
         assert project_attribute_keys_data == []
 
     def test_get_project_data(self):
@@ -55,16 +56,19 @@ class APITestCase(TestCase):
         assert project_data["weather_station"] == "012345"
         assert project_data["latitude"] == 89.0
         assert project_data["longitude"] == -42.0
-        assert project_data["baseline_period_end"] == "2015-01-01T00:00:00+0000"
-        assert project_data["reporting_period_start"] == "2015-02-01T00:00:00+0000"
+        assert project_data[
+            "baseline_period_end"] == "2015-01-01T00:00:00+0000"
+        assert project_data[
+            "reporting_period_start"] == "2015-02-01T00:00:00+0000"
         assert project_attributes_data == []
 
     def test_get_consumption_records_data(self):
-        consumptions_data = api._get_consumption_data(self.minimal_consumption_df)
+        consumptions_data = api._get_consumption_data(
+            self.minimal_consumption_df)
         consumption_metadata, consumption_records = next(consumptions_data)
         assert consumption_metadata["fuel_type"] == "E"
         assert consumption_metadata["energy_unit"] == "KWH"
         assert consumption_metadata["project_id"] == "ID_1"
         assert consumption_records[0]["value"] == 0.0
-        assert consumption_records[0]["estimated"] == True
+        assert consumption_records[0]["estimated"]
         assert consumption_records[0]["start"] == "2015-01-01T00:00:00+0000"

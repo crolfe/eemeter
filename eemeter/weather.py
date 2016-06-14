@@ -18,12 +18,13 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class NOAAClient(object):
 
     def __init__(self, n_tries=3):
         self.n_tries = n_tries
-        self.ftp = None # lazily load
-        self.station_index = None # lazily load
+        self.ftp = None  # lazily load
+        self.station_index = None  # lazily load
 
     def _get_ftp_connection(self):
         for _ in range(self.n_tries):
@@ -65,16 +66,25 @@ class NOAAClient(object):
                 self.ftp.retrbinary('RETR {}'.format(filename), string.write)
                 break
             except (IOError, ftplib.error_perm) as e1:
-                logger.warn("Failed FTP RETR for station %s: %s", station_id, e1)
-            except (ftplib.error_temp, EOFError) as e2: # Bad connection. attempt to reconnect.
-                logger.warn("Failed FTP RETR for station %s: %s. Attempting reconnect.", station_id, e2)
+                logger.warn(
+                    "Failed FTP RETR for station %s: %s",
+                    station_id,
+                    e1)
+            # Bad connection. attempt to reconnect.
+            except (ftplib.error_temp, EOFError) as e2:
+                logger.warn(
+                    "Failed FTP RETR for station %s: %s. Attempting reconnect.",
+                    station_id,
+                    e2)
                 self.ftp.close()
                 self.ftp = self._get_ftp_connection()
                 try:
-                    self.ftp.retrbinary('RETR {}'.format(filename), string.write)
+                    self.ftp.retrbinary(
+                        'RETR {}'.format(filename), string.write)
                     break
                 except (IOError, ftplib.error_perm) as e3:
-                    logger.warn("Failed FTP RETR for station %s: %s.", station_id, e3)
+                    logger.warn(
+                        "Failed FTP RETR for station %s: %s.", station_id, e3)
 
         string.seek(0)
         f = gzip.GzipFile(fileobj=string)
@@ -89,11 +99,11 @@ class NOAAClient(object):
 
         days = []
         for line in lines[1:]:
-            columns=line.split()
+            columns = line.split()
             date_str = columns[2].decode('utf-8')
             temp_F = float(columns[3])
-            temp_C = (5./9.) * (temp_F - 32.)
-            dt = datetime.strptime(date_str,"%Y%m%d").date()
+            temp_C = (5. / 9.) * (temp_F - 32.)
+            dt = datetime.strptime(date_str, "%Y%m%d").date()
             days.append({"temp_C": temp_C, "date": dt})
 
         return days
@@ -119,8 +129,8 @@ class NOAAClient(object):
 class TMY3Client(object):
 
     def __init__(self):
-        self.stations = None # lazily load
-        self.station_to_lat_lng = None # lazily load
+        self.stations = None  # lazily load
+        self.station_to_lat_lng = None  # lazily load
 
     def _load_stations(self):
         with resource_stream('eemeter.resources', 'tmy3_stations.json') as f:
@@ -150,7 +160,8 @@ class TMY3Client(object):
 
         for dist, (nearby_station, _) in zip(dists, index_list):
             if nearby_station in self.stations:
-                warnings.warn("Using station {} instead".format(nearby_station))
+                warnings.warn(
+                    "Using station {} instead".format(nearby_station))
                 return nearby_station
         return None
 
@@ -159,11 +170,11 @@ class TMY3Client(object):
         if self.stations is None:
             self.stations = self._load_stations()
 
-        if not station in self.stations:
+        if station not in self.stations:
             warnings.warn(
                 "Station {} is not a TMY3 station. "
                 "See self.stations for a complete list.".format(station)
-                )
+            )
             if station_fallback:
                 station = self._find_nearby_station(station)
             else:
@@ -172,7 +183,8 @@ class TMY3Client(object):
         if station is None:
             return None
 
-        url = "http://rredc.nrel.gov/solar/old_data/nsrdb/1991-2005/data/tmy3/{}TYA.CSV".format(station)
+        url = "http://rredc.nrel.gov/solar/old_data/nsrdb/1991-2005/data/tmy3/{}TYA.CSV".format(
+            station)
         r = requests.get(url)
 
         if r.status_code == 200:
@@ -183,13 +195,16 @@ class TMY3Client(object):
                 month = row[0][0:2]
                 day = row[0][3:5]
                 hour = int(row[1][0:2]) - 1
-                date_string = "{}{}{}{:02d}".format(year, month, day, hour) # YYYYMMDDHH
-                dt = datetime.strptime(date_string,"%Y%m%d%H")
+                date_string = "{}{}{}{:02d}".format(
+                    year, month, day, hour)  # YYYYMMDDHH
+                dt = datetime.strptime(date_string, "%Y%m%d%H")
                 temp_C = float(row[31])
                 hours.append({"temp_C": temp_C, "dt": dt})
             return hours
         else:
-            warnings.warn("Station {} was not found. Tried url {}.".format(station, url))
+            warnings.warn(
+                "Station {} was not found. Tried url {}.".format(
+                    station, url))
             return None
 
 
@@ -204,9 +219,10 @@ class WeatherSourceBase(object):
         if unit is None or unit == "degC":
             return x
         elif unit == "degF":
-            return 1.8*x + 32
+            return 1.8 * x + 32
         else:
-            message = "Unit not supported ({}). Use 'degF' or 'degC'".format(unit)
+            message = "Unit not supported ({}). Use 'degF' or 'degC'".format(
+                unit)
             raise NotImplementedError(message)
 
     def _fetch_period(self, period):
@@ -239,7 +255,8 @@ class WeatherSourceBase(object):
         """
 
         if is_list_like(periods):
-            values = np.array([self._period_average_temperature(p, None) for p in periods])
+            values = np.array(
+                [self._period_average_temperature(p, None) for p in periods])
             return self._unit_convert(values, unit)
         else:
             return self._period_average_temperature(periods, unit)
@@ -265,7 +282,8 @@ class WeatherSourceBase(object):
         """
 
         if is_list_like(periods):
-            values = np.array([self._period_daily_temperatures(p, None) for p in periods])
+            values = np.array(
+                [self._period_daily_temperatures(p, None) for p in periods])
             return self._unit_convert(values, unit)
         else:
             return self._period_daily_temperatures(periods, unit)
@@ -291,14 +309,18 @@ class WeatherSourceBase(object):
         """
 
         if is_list_like(periods):
-            values = np.array([self._period_hourly_temperatures(p, None) for p in periods])
+            values = np.array(
+                [self._period_hourly_temperatures(p, None) for p in periods])
             return self._unit_convert(values, unit)
         else:
             return self._period_hourly_temperatures(periods, unit)
 
     def _period_average_temperature(self, period, unit):
         self._fetch_period(period)
-        value = self.tempC[period.start:period.end - timedelta(seconds=1)].mean()
+        value = self.tempC[
+            period.start:period.end -
+            timedelta(
+                seconds=1)].mean()
         return self._unit_convert(value, unit)
 
     def _period_daily_temperatures(self, period, unit):
@@ -398,7 +420,8 @@ class WeatherSourceBase(object):
         """
 
         if is_list_like(periods):
-            return np.array([self._period_hdd(p, unit, base, per_day) for p in periods])
+            return np.array([self._period_hdd(p, unit, base, per_day)
+                             for p in periods])
         else:
             return self._period_hdd(periods, unit, base, per_day)
 
@@ -425,7 +448,8 @@ class WeatherSourceBase(object):
         """
 
         if is_list_like(periods):
-            return np.array([self._period_cdd(p, unit, base, per_day) for p in periods])
+            return np.array([self._period_cdd(p, unit, base, per_day)
+                             for p in periods])
         else:
             return self._period_cdd(periods, unit, base, per_day)
 
@@ -451,9 +475,9 @@ class WeatherSourceBase(object):
             Total heating degree days observed during the time period.
         """
 
-        temps = self._period_daily_temperatures(period,unit)
+        temps = self._period_daily_temperatures(period, unit)
         masked_temps = np.ma.masked_array(temps, np.isnan(temps))
-        total_hdd = np.sum(np.maximum(base - masked_temps,0))
+        total_hdd = np.sum(np.maximum(base - masked_temps, 0))
         if per_day:
             n_days = period.timedelta.days
             return total_hdd / n_days
@@ -482,9 +506,9 @@ class WeatherSourceBase(object):
             Total cooling degree days observed during the time period.
         """
 
-        temps = self._period_daily_temperatures(period,unit)
+        temps = self._period_daily_temperatures(period, unit)
         masked_temps = np.ma.masked_array(temps, np.isnan(temps))
-        total_cdd = np.sum(np.maximum(masked_temps - base,0))
+        total_cdd = np.sum(np.maximum(masked_temps - base, 0))
         if per_day:
             n_days = period.timedelta.days
             return total_cdd / n_days
@@ -526,15 +550,18 @@ class CachedWeatherSourceBase(WeatherSourceBase):
     def get_cache_directory(self):
         """ Returns a directory to be used for caching.
         """
-        directory = os.environ.get("EEMETER_WEATHER_CACHE_DIRECTORY", os.path.expanduser('~/.eemeter/cache'))
+        directory = os.environ.get(
+            "EEMETER_WEATHER_CACHE_DIRECTORY",
+            os.path.expanduser('~/.eemeter/cache'))
         if not os.path.exists(directory):
             os.makedirs(directory)
         return directory
 
     def save_to_cache(self):
-        data = [[d.strftime(self.cache_date_format), t if pd.notnull(t) else None] for d,t in self.tempC.iteritems()]
+        data = [[d.strftime(self.cache_date_format), t if pd.notnull(
+            t) else None] for d, t in self.tempC.iteritems()]
         with open(self.cache_filename, 'w') as f:
-            json.dump(data,f)
+            json.dump(data, f)
 
     def load_from_cache(self):
         try:
@@ -542,14 +569,19 @@ class CachedWeatherSourceBase(WeatherSourceBase):
                 data = json.load(f)
         except IOError:
             return
-        except ValueError: # Corrupted json file
+        except ValueError:  # Corrupted json file
             self.clear_cache()
             return
-        index = pd.to_datetime([d[0] for d in data], format=self.cache_date_format)
+        index = pd.to_datetime([d[0] for d in data],
+                               format=self.cache_date_format)
         values = [d[1] for d in data]
 
         # changed for pandas > 0.18
-        self.tempC = pd.Series(values, index=index, dtype=float).sort_index().resample(self.freq).mean()
+        self.tempC = pd.Series(
+            values,
+            index=index,
+            dtype=float).sort_index().resample(
+            self.freq).mean()
 
     def clear_cache(self):
         try:
@@ -564,9 +596,9 @@ class NOAAWeatherSourceBase(CachedWeatherSourceBase):
     client = NOAAClient()
 
     def __init__(self, station, start_year=None, end_year=None,
-            cache_directory=None, cache_filename=None):
+                 cache_directory=None, cache_filename=None):
         super(NOAAWeatherSourceBase, self).__init__(station, cache_directory,
-                cache_filename)
+                                                    cache_filename)
 
         self._year_fetches_attempted = set()
 
@@ -649,21 +681,29 @@ class GSODWeatherSource(NOAAWeatherSourceBase):
             if self._year_in_series(year):
                 return
             else:
-                dates = pd.date_range("{}-01-01".format(year),"{}-12-31".format(year), freq=self.freq)
+                dates = pd.date_range(
+                    "{}-01-01".format(year),
+                    "{}-12-31".format(year),
+                    freq=self.freq)
                 new_series = pd.Series(None, index=dates, dtype=float)
-                self.tempC = self.tempC.append(new_series).sort_index().resample(self.freq).mean()
+                self.tempC = self.tempC.append(
+                    new_series).sort_index().resample(self.freq).mean()
                 self.save_to_cache()
                 return
 
         data = self.client.get_gsod_data(self.station, year)
-        dates = pd.date_range("{}-01-01".format(year),"{}-12-31".format(year), freq=self.freq)
+        dates = pd.date_range(
+            "{}-01-01".format(year),
+            "{}-12-31".format(year),
+            freq=self.freq)
         new_series = pd.Series(None, index=dates, dtype=float)
         for day in data:
             if not pd.isnull(day["temp_C"]):
                 new_series[day["date"]] = day["temp_C"]
 
         # changed for pandas > 0.18
-        self.tempC = self.tempC.append(new_series).sort_index().resample(self.freq).mean()
+        self.tempC = self.tempC.append(
+            new_series).sort_index().resample(self.freq).mean()
         self.save_to_cache()
         self._year_fetches_attempted.add(year)
 
@@ -687,22 +727,33 @@ class ISDWeatherSource(NOAAWeatherSourceBase):
             if self._year_in_series(year):
                 return
             else:
-                dates = pd.date_range("{}-01-01 00:00".format(year),"{}-01-01 00:00".format(int(year) + 1), freq=self.freq)[:-1]
+                dates = pd.date_range("{}-01-01 00:00".format(year),
+                                      "{}-01-01 00:00".format(int(year) + 1),
+                                      freq=self.freq)[:-1]
                 new_series = pd.Series(None, index=dates, dtype=float)
-                self.tempC = self.tempC.append(new_series).sort_index().resample(self.freq).mean()
+                self.tempC = self.tempC.append(
+                    new_series).sort_index().resample(self.freq).mean()
                 self.save_to_cache()
                 return
 
         data = self.client.get_isd_data(self.station, year)
-        dates = pd.date_range("{}-01-01 00:00".format(year),"{}-01-01 00:00".format(int(year) + 1), freq=self.freq)[:-1]
+        dates = pd.date_range("{}-01-01 00:00".format(year),
+                              "{}-01-01 00:00".format(int(year) + 1),
+                              freq=self.freq)[:-1]
         new_series = pd.Series(None, index=dates, dtype=float)
         for hour in data:
             if not pd.isnull(hour["temp_C"]):
                 dt = hour["datetime"]
-                new_series[datetime(dt.year, dt.month, dt.day, dt.hour)] = hour["temp_C"]
+                new_series[
+                    datetime(
+                        dt.year,
+                        dt.month,
+                        dt.day,
+                        dt.hour)] = hour["temp_C"]
 
         # changed for pandas > 0.18
-        self.tempC = self.tempC.append(new_series).sort_index().resample(self.freq).mean()
+        self.tempC = self.tempC.append(
+            new_series).sort_index().resample(self.freq).mean()
         self.save_to_cache()
         self._year_fetches_attempted.add(year)
 
@@ -725,13 +776,30 @@ class TMY3WeatherSource(CachedWeatherSourceBase):
         data = self.client.get_tmy3_data(self.station, self.station_fallback)
         if data is None:
             temps = [np.nan for _ in range(365 * 24)]
-            index = [datetime(1900, 1, 1) + timedelta(seconds=i*3600) for i in range(365 * 24)]
+            index = [
+                datetime(
+                    1900,
+                    1,
+                    1) +
+                timedelta(
+                    seconds=i *
+                    3600) for i in range(
+                    365 *
+                    24)]
         else:
             temps = [d["temp_C"] for d in data]
-            index = [datetime(1900, d["dt"].month, d["dt"].day, d["dt"].hour) for d in data]
+            index = [
+                datetime(
+                    1900,
+                    d["dt"].month,
+                    d["dt"].day,
+                    d["dt"].hour) for d in data]
 
         # changed for pandas > 0.18
-        self.tempC = pd.Series(temps, index=index, dtype=float).sort_index().resample('H').mean()
+        self.tempC = pd.Series(
+            temps,
+            index=index,
+            dtype=float).sort_index().resample('H').mean()
         self.save_to_cache()
 
     def annual_daily_temperatures(self, unit):
@@ -751,14 +819,18 @@ class TMY3WeatherSource(CachedWeatherSourceBase):
 
         """
 
-        periods = [Period(start=datetime(1900,1,1), end=datetime(1901,1,1))]
+        periods = [
+            Period(
+                start=datetime(
+                    1900, 1, 1), end=datetime(
+                    1901, 1, 1))]
         return self.daily_temperatures(periods, unit)
 
     def _fetch_period(self, period):
-        pass # loaded at init
+        pass  # loaded at init
 
     def _fetch_datetime(self, dt):
-        pass # loaded at init
+        pass  # loaded at init
 
     def _normalize_period(self, period):
         start = self._normalize_datetime(period.start)
@@ -768,19 +840,38 @@ class TMY3WeatherSource(CachedWeatherSourceBase):
 
     @staticmethod
     def _normalize_datetime(dt, year_offset=0):
-        return datetime(1900 + year_offset, dt.month, dt.day, dt.hour, dt.minute, dt.second)
+        return datetime(
+            1900 +
+            year_offset,
+            dt.month,
+            dt.day,
+            dt.hour,
+            dt.minute,
+            dt.second)
 
     def _period_average_temperature(self, period, unit):
         period = self._normalize_period(period)
-        return super(TMY3WeatherSource, self)._period_average_temperature(period, unit)
+        return super(
+            TMY3WeatherSource,
+            self)._period_average_temperature(
+            period,
+            unit)
 
     def _period_daily_temperatures(self, period, unit):
         period = self._normalize_period(period)
-        return super(TMY3WeatherSource, self)._period_daily_temperatures(period, unit)
+        return super(
+            TMY3WeatherSource,
+            self)._period_daily_temperatures(
+            period,
+            unit)
 
     def _period_hourly_temperatures(self, period, unit):
         period = self._normalize_period(period)
-        return super(TMY3WeatherSource, self)._period_hourly_temperatures(period, unit)
+        return super(
+            TMY3WeatherSource,
+            self)._period_hourly_temperatures(
+            period,
+            unit)
 
     def datetime_average_temperature(self, dt, unit):
         """The daily average temperatures for a particular period.
@@ -798,7 +889,11 @@ class TMY3WeatherSource(CachedWeatherSourceBase):
             Average temperature observed.
         """
         dt = self._normalize_datetime(dt)
-        return super(TMY3WeatherSource, self).datetime_average_temperature(dt, unit)
+        return super(
+            TMY3WeatherSource,
+            self).datetime_average_temperature(
+            dt,
+            unit)
 
     def datetime_hourly_temperature(self, dt, unit):
         """The hourly observed temperatures for each period.
@@ -820,4 +915,8 @@ class TMY3WeatherSource(CachedWeatherSourceBase):
             temperatures will be returned.
         """
         dt = self._normalize_datetime(dt)
-        return super(TMY3WeatherSource, self).datetime_hourly_temperature(dt, unit)
+        return super(
+            TMY3WeatherSource,
+            self).datetime_hourly_temperature(
+            dt,
+            unit)

@@ -332,6 +332,7 @@ bpi_meter_yaml = """
 }
 """
 
+
 class BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria(YamlDefinedMeter):
     """Implementation of BPI-2400-S-2012 section 3.2.2.
 
@@ -422,12 +423,16 @@ class BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria(YamlDefinedMeter):
 
     def __init__(self, temperature_unit_str, **kwargs):
 
-        if temperature_unit_str not in ["degF","degC"]:
-            raise ValueError("Invalid temperature_unit_str: should be one of 'degF' or 'degC'.")
+        if temperature_unit_str not in ["degF", "degC"]:
+            raise ValueError(
+                "Invalid temperature_unit_str: should be one of 'degF' or 'degC'.")
 
         self.temperature_unit_str = temperature_unit_str
 
-        super(BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria, self).__init__(**kwargs)
+        super(
+            BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria,
+            self).__init__(
+            **kwargs)
 
     def default_settings(self):
 
@@ -447,95 +452,97 @@ class BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria(YamlDefinedMeter):
                 return slope_degF * 1.8
 
         settings = {
-                "temperature_unit_str": self.temperature_unit_str,
-                "electricity_baseload_low": 0,
-                "electricity_baseload_x0": 0,
-                "electricity_baseload_high": 1000,
-                "electricity_heating_slope_low": convert_slope_degF_to_target(0),
-                "electricity_heating_slope_x0": convert_slope_degF_to_target(0),
-                "electricity_heating_slope_high": convert_slope_degF_to_target(1000),
-                "electricity_cooling_slope_low": convert_slope_degF_to_target(0),
-                "electricity_cooling_slope_x0": convert_slope_degF_to_target(0),
-                "electricity_cooling_slope_high": convert_slope_degF_to_target(1000),
+            "temperature_unit_str": self.temperature_unit_str,
+            "electricity_baseload_low": 0,
+            "electricity_baseload_x0": 0,
+            "electricity_baseload_high": 1000,
+            "electricity_heating_slope_low": convert_slope_degF_to_target(0),
+            "electricity_heating_slope_x0": convert_slope_degF_to_target(0),
+            "electricity_heating_slope_high": convert_slope_degF_to_target(1000),
+            "electricity_cooling_slope_low": convert_slope_degF_to_target(0),
+            "electricity_cooling_slope_x0": convert_slope_degF_to_target(0),
+            "electricity_cooling_slope_high": convert_slope_degF_to_target(1000),
 
-                "natural_gas_baseload_low": 0,
-                "natural_gas_baseload_x0": 0,
-                "natural_gas_baseload_high": 1000,
-                "natural_gas_heating_slope_low":  convert_slope_degF_to_target(0),
-                "natural_gas_heating_slope_x0":  convert_slope_degF_to_target(0),
-                "natural_gas_heating_slope_high":  convert_slope_degF_to_target(1000),
+            "natural_gas_baseload_low": 0,
+            "natural_gas_baseload_x0": 0,
+            "natural_gas_baseload_high": 1000,
+            "natural_gas_heating_slope_low": convert_slope_degF_to_target(0),
+            "natural_gas_heating_slope_x0": convert_slope_degF_to_target(0),
+            "natural_gas_heating_slope_high": convert_slope_degF_to_target(1000),
 
-                "heating_balance_temp_low": convert_temp_degF_to_target(55),
-                "heating_balance_temp_x0": convert_temp_degF_to_target(60),
-                "heating_balance_temp_high": convert_temp_degF_to_target(70),
-                "cooling_balance_temp_low": convert_temp_degF_to_target(60),
-                "cooling_balance_temp_x0": convert_temp_degF_to_target(70),
-                "cooling_balance_temp_high": convert_temp_degF_to_target(75),
+            "heating_balance_temp_low": convert_temp_degF_to_target(55),
+            "heating_balance_temp_x0": convert_temp_degF_to_target(60),
+            "heating_balance_temp_high": convert_temp_degF_to_target(70),
+            "cooling_balance_temp_low": convert_temp_degF_to_target(60),
+            "cooling_balance_temp_x0": convert_temp_degF_to_target(70),
+            "cooling_balance_temp_high": convert_temp_degF_to_target(75),
 
-                "hdd_base": convert_temp_degF_to_target(65),
-                "cdd_base": convert_temp_degF_to_target(65),
+            "hdd_base": convert_temp_degF_to_target(65),
+            "cdd_base": convert_temp_degF_to_target(65),
         }
         return settings
 
     def validate_settings(self, settings):
 
-        if not 0 <= settings["electricity_baseload_low"] <= \
-                settings["electricity_baseload_x0"] <= settings["electricity_baseload_high"]:
+        if not 0 <= settings["electricity_baseload_low"] <= settings[
+                "electricity_baseload_x0"] <= settings["electricity_baseload_high"]:
             message = "Electricity baseload parameter limits must be such " \
-                    "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
-                    "high={}".format(settings["electricity_baseload_low"],
-                            settings["electricity_baseload_x0"],
-                            settings["electricity_baseload_high"])
+                "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
+                "high={}".format(settings["electricity_baseload_low"],
+                                 settings["electricity_baseload_x0"],
+                                 settings["electricity_baseload_high"])
             raise ValueError(message)
-        if not 0 <= settings["electricity_heating_slope_low"] <= \
-                settings["electricity_heating_slope_x0"] <= settings["electricity_heating_slope_high"]:
+        if not 0 <= settings["electricity_heating_slope_low"] <= settings[
+                "electricity_heating_slope_x0"] <= settings["electricity_heating_slope_high"]:
             message = "Electricity heating slope parameter limits must be such " \
-                    "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
-                    "high={}".format(settings["electricity_heating_slope_low"],
-                            settings["electricity_heating_slope_x0"],
-                            settings["electricity_heating_slope_high"])
+                "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
+                "high={}".format(settings["electricity_heating_slope_low"],
+                                 settings["electricity_heating_slope_x0"],
+                                 settings["electricity_heating_slope_high"])
             raise ValueError(message)
-        if not 0 <= settings["electricity_cooling_slope_low"] <= \
-                settings["electricity_cooling_slope_x0"] <= settings["electricity_cooling_slope_high"]:
+        if not 0 <= settings["electricity_cooling_slope_low"] <= settings[
+                "electricity_cooling_slope_x0"] <= settings["electricity_cooling_slope_high"]:
             message = "Electricity cooling slope parameter limits must be such " \
-                    "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
-                    "high={}".format(settings["electricity_cooling_slope_low"],
-                            settings["electricity_cooling_slope_x0"],
-                            settings["electricity_cooling_slope_high"])
+                "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
+                "high={}".format(settings["electricity_cooling_slope_low"],
+                                 settings["electricity_cooling_slope_x0"],
+                                 settings["electricity_cooling_slope_high"])
             raise ValueError(message)
 
-        if not 0 <= settings["natural_gas_baseload_low"] <= \
-                settings["natural_gas_baseload_x0"] <= settings["natural_gas_baseload_high"]:
+        if not 0 <= settings["natural_gas_baseload_low"] <= settings[
+                "natural_gas_baseload_x0"] <= settings["natural_gas_baseload_high"]:
             message = "Natural gas baseload parameter limits must be such " \
-                    "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
-                    "high={}".format(settings["natural_gas_baseload_low"],
-                            settings["natural_gas_baseload_x0"],
-                            settings["natural_gas_baseload_high"])
+                "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
+                "high={}".format(settings["natural_gas_baseload_low"],
+                                 settings["natural_gas_baseload_x0"],
+                                 settings["natural_gas_baseload_high"])
             raise ValueError(message)
-        if not 0 <= settings["natural_gas_heating_slope_low"] <= \
-                settings["natural_gas_heating_slope_x0"] <= settings["natural_gas_heating_slope_high"]:
+        if not 0 <= settings["natural_gas_heating_slope_low"] <= settings[
+                "natural_gas_heating_slope_x0"] <= settings["natural_gas_heating_slope_high"]:
             message = "Natural gas heating slope parameter limits must be such " \
-                    "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
-                    "high={}".format(settings["natural_gas_heating_slope_low"],
-                            settings["natural_gas_heating_slope_x0"],
-                            settings["natural_gas_heating_slope_high"])
+                "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
+                "high={}".format(settings["natural_gas_heating_slope_low"],
+                                 settings["natural_gas_heating_slope_x0"],
+                                 settings["natural_gas_heating_slope_high"])
             raise ValueError(message)
 
-
-        if not settings["heating_balance_temp_low"] <= settings["heating_balance_temp_x0"] <= settings["heating_balance_temp_high"]:
-            raise ValueError("Heating balance temperature parameter limits must be such that low <= x0 <= high")
+        if not settings["heating_balance_temp_low"] <= settings[
+                "heating_balance_temp_x0"] <= settings["heating_balance_temp_high"]:
+            raise ValueError(
+                "Heating balance temperature parameter limits must be such that low <= x0 <= high")
             message = "Heating balance temperature parameter limits must be such " \
-                    "that low <= x0 <= high, but found low={}, x0={}, " \
-                    "high={}".format(settings["heating_balance_temp_low"],
-                            settings["heating_balance_temp_x0"],
-                            settings["heating_balance_temp_high"])
+                "that low <= x0 <= high, but found low={}, x0={}, " \
+                "high={}".format(settings["heating_balance_temp_low"],
+                                 settings["heating_balance_temp_x0"],
+                                 settings["heating_balance_temp_high"])
             raise ValueError(message)
-        if not settings["cooling_balance_temp_low"] <= settings["cooling_balance_temp_x0"] <= settings["cooling_balance_temp_high"]:
+        if not settings["cooling_balance_temp_low"] <= settings[
+                "cooling_balance_temp_x0"] <= settings["cooling_balance_temp_high"]:
             message = "Cooling balance temperature parameter limits must be such " \
-                    "that low <= x0 <= high, but found low={}, x0={}, " \
-                    "high={}".format(settings["cooling_balance_temp_low"],
-                            settings["cooling_balance_temp_x0"],
-                            settings["cooling_balance_temp_high"])
+                "that low <= x0 <= high, but found low={}, x0={}, " \
+                "high={}".format(settings["cooling_balance_temp_low"],
+                                 settings["cooling_balance_temp_x0"],
+                                 settings["cooling_balance_temp_high"])
             raise ValueError(message)
 
     @property
@@ -680,4 +687,6 @@ class BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria(YamlDefinedMeter):
               periods.
 
         """
-        return super(BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria, self).evaluate(data_collection)
+        return super(
+            BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria,
+            self).evaluate(data_collection)
