@@ -1,17 +1,14 @@
 from datetime import timedelta
-from eemeter.consumption import ConsumptionData
-from eemeter.evaluation import Period
-from eemeter.project import Project
 
-from eemeter.meter import AnnualizedUsageMeter
-from eemeter.weather import GSODWeatherSource
-from eemeter.weather import TMY3WeatherSource
-
-import random
 import numpy as np
 import pandas as pd
 
 from scipy.stats import poisson
+
+from eemeter.consumption import ConsumptionData
+from eemeter.meter import AnnualizedUsageMeter
+from eemeter.project import Project
+from eemeter.weather import GSODWeatherSource, TMY3WeatherSource
 
 
 class MonthlyBillingConsumptionGenerator:

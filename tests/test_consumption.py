@@ -1,17 +1,15 @@
+from datetime import datetime, timedelta
+
+import numpy as np
+import pandas as pd
+import pytest
+import pytz
+
+from numpy.testing import assert_allclose
+
 from eemeter.consumption import ConsumptionData
 from eemeter.evaluation import Period
 
-from datetime import timedelta
-from datetime import datetime
-import numpy as np
-from numpy.testing import assert_allclose
-import pandas as pd
-import warnings
-import pytz
-
-from pint.unit import UndefinedUnitError
-
-import pytest
 
 RTOL = 1e-3
 ATOL = 1e-3

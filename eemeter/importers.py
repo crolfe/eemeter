@@ -1,16 +1,16 @@
-from lxml import etree
-from dateutil.parser import parse
-from eemeter.consumption import ConsumptionData
 from datetime import datetime
-from csv import DictReader
-import dateutil.parser
 from warnings import warn
 
 import pandas as pd
 
+from dateutil.parser import parse
+from lxml import etree
 from sqlalchemy import create_engine
-from sqlalchemy import Table, Column, Integer, Float, Numeric, String, MetaData, ForeignKey, TIMESTAMP
+from sqlalchemy import (Table, Column, Integer, Float, Numeric, String,
+                        MetaData, ForeignKey, TIMESTAMP)
 from sqlalchemy.sql import select
+
+from eemeter.consumption import ConsumptionData
 
 
 # TODO: DEPRECATE THESE --->> replacing in eemeter.parsers
@@ -45,8 +45,8 @@ def import_hpxml(filename):
     root = tree.getroot()
     ns = root.nsmap
 
-    consumption_info_xpath = "ns2:Consumption/ns2:ConsumptionDetails/ns2:ConsumptionInfo"
-    consumption_infos = root.xpath(consumption_info_xpath, namespaces=ns)
+    xpath = "ns2:Consumption/ns2:ConsumptionDetails/ns2:ConsumptionInfo"
+    consumption_infos = root.xpath(xpath, namespaces=ns)
 
     consumption = []
     for info in consumption_infos:

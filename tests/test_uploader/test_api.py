@@ -1,10 +1,9 @@
+from datetime import datetime
 from unittest import TestCase
 
-from eemeter.uploader import api
-
 import pandas as pd
-from datetime import datetime
-import pytz
+
+from eemeter.uploader import api
 
 
 class APITestCase(TestCase):

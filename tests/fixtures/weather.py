@@ -3,9 +3,6 @@ import pytest
 from eemeter.weather import GSODWeatherSource
 from eemeter.weather import TMY3WeatherSource
 
-from pkg_resources import resource_stream
-import os
-
 
 @pytest.fixture(scope="session")
 def gsod_722880_2012_2014_weather_source():

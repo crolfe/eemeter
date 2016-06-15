@@ -1,3 +1,3 @@
-from .api import *
-from .requester import Requester
-from .uploaders import *
+from .api import *  # NOQA
+from .requester import Requester  # NOQA
+from .uploaders import *  # NOQA

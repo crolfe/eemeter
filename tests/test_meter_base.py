@@ -1,18 +1,11 @@
-from eemeter.config.yaml_parser import load
-
-from eemeter.meter import MeterBase
-from eemeter.meter import DataContainer
-from eemeter.meter import DataCollection
-
-from eemeter.meter import DummyMeter
-from eemeter.meter import Sequence
-from eemeter.meter import Condition
+import json
 
 import numpy as np
 import pandas as pd
-import json
-
 import pytest
+
+from eemeter.config.yaml_parser import load
+from eemeter.meter import DataCollection, DataContainer
 
 
 @pytest.fixture

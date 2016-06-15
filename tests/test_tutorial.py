@@ -1,7 +1,5 @@
-from eemeter.consumption import ConsumptionData
 from eemeter.examples import get_example_project
-from eemeter.meter import DefaultResidentialMeter
-from eemeter.meter import DataCollection
+from eemeter.meter import DefaultResidentialMeter, DataCollection
 
 
 def test_tutorial():

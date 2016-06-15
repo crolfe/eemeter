@@ -1,6 +1,6 @@
 from eemeter.meter.base import YamlDefinedMeter
-from datetime import datetime
-import pytz
+
+# TODO: load from external file?
 
 bpi_meter_yaml = """
 !obj:eemeter.meter.Sequence {

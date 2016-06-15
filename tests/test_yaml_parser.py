@@ -1,15 +1,13 @@
-from eemeter.config.yaml_parser import load_path, load, dump
-
-import yaml
 import tempfile
 import os
-from decimal import Decimal
-from eemeter.config.yaml_parser import Setting
 
-from eemeter.meter import BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria
-from eemeter.meter import DefaultResidentialMeter
+from decimal import Decimal
 
 import pytest
+
+from eemeter.config.yaml_parser import load_path, load, dump
+from eemeter.meter import (BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria,
+                           DefaultResidentialMeter)
 
 
 @pytest.fixture(params=["!obj:decimal.Decimal { value : '1.23' }",

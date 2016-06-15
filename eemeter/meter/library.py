@@ -1,14 +1,10 @@
-from .base import MeterBase
-
-from eemeter.consumption import ConsumptionData
 from datetime import datetime
-from datetime import timedelta
-from eemeter.evaluation import Period
-import pytz
 
-from itertools import chain
 import numpy as np
 import pandas as pd
+
+from .base import MeterBase
+from eemeter.evaluation import Period
 
 
 class TemperatureSensitivityParameterOptimizationMeter(MeterBase):

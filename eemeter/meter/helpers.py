@@ -1,9 +1,7 @@
-from .base import MeterBase
-
-from eemeter.consumption import ConsumptionData
-
-from itertools import chain
 from pprint import pprint
+
+from .base import MeterBase
+from eemeter.consumption import ConsumptionData
 
 try:
     unicode = unicode

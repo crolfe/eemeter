@@ -1,61 +1,30 @@
-from eemeter.config.yaml_parser import load
-from eemeter.meter import DataCollection
+from datetime import datetime, timedelta
 
-from eemeter.consumption import ConsumptionData
-from eemeter.evaluation import Period
-from eemeter.location import Location
-from eemeter.project import Project
-
-from eemeter.meter import TimeSpanMeter
-from eemeter.meter import TotalHDDMeter
-from eemeter.meter import TotalCDDMeter
-from eemeter.meter import NormalAnnualHDD
-from eemeter.meter import NormalAnnualCDD
-from eemeter.meter import NPeriodsMeetingHDDPerDayThreshold
-from eemeter.meter import NPeriodsMeetingCDDPerDayThreshold
-from eemeter.meter import RecentReadingMeter
-from eemeter.meter import GrossSavingsMeter
-from eemeter.meter import AnnualizedGrossSavingsMeter
-from eemeter.meter import AverageDailyUsage
-from eemeter.meter import EstimatedAverageDailyUsage
-from eemeter.meter import ConsumptionDataAttributes
-from eemeter.meter import ProjectAttributes
-from eemeter.meter import ProjectConsumptionDataBaselineReporting
-from eemeter.meter import ProjectFuelTypes
-from eemeter.meter import DownsampleConsumption
-
-from eemeter.models import AverageDailyTemperatureSensitivityModel
-
-from fixtures.weather import gsod_722880_2012_2014_weather_source
-from fixtures.weather import tmy3_722880_weather_source
-
-from fixtures.consumption import consumption_generator_1
-from fixtures.consumption import consumption_generator_2
-from fixtures.consumption import generated_consumption_data_1
-from fixtures.consumption import generated_consumption_data_2
-from fixtures.consumption import generated_consumption_data_pre_post_1
-from fixtures.consumption import generated_consumption_data_with_annualized_usage_1
-from fixtures.consumption import generated_consumption_data_pre_post_with_gross_savings_1
-from fixtures.consumption import generated_consumption_data_pre_post_with_annualized_gross_savings_1
-from fixtures.consumption import consumption_data_1
-from fixtures.consumption import consumption_data_15min
-from fixtures.consumption import time_span_1
-from fixtures.consumption import generated_consumption_data_with_hdd_1
-from fixtures.consumption import generated_consumption_data_with_cdd_1
-from fixtures.consumption import generated_consumption_data_with_n_periods_hdd_1
-from fixtures.consumption import generated_consumption_data_with_n_periods_cdd_1
-
-from datetime import datetime
-from datetime import timedelta
+import numpy as np
+import pytest
 import pytz
 
 from numpy.testing import assert_allclose
-import numpy as np
+
+from eemeter.config.yaml_parser import load
+from eemeter.consumption import ConsumptionData
+from eemeter.evaluation import Period
+from eemeter.location import Location
+from eemeter.meter import (AnnualizedGrossSavingsMeter, AverageDailyUsage,
+                           ConsumptionDataAttributes, DataCollection,
+                           DownsampleConsumption, GrossSavingsMeter,
+                           NPeriodsMeetingCDDPerDayThreshold,
+                           NPeriodsMeetingHDDPerDayThreshold, NormalAnnualCDD,
+                           NormalAnnualHDD, ProjectAttributes,
+                           ProjectConsumptionDataBaselineReporting,
+                           ProjectFuelTypes, RecentReadingMeter, TimeSpanMeter,
+                           TotalCDDMeter, TotalHDDMeter)
+from eemeter.models import AverageDailyTemperatureSensitivityModel
+from eemeter.project import Project
+
 
 RTOL = 1e-2
 ATOL = 1e-2
-
-import pytest
 
 
 @pytest.mark.slow

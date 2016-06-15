@@ -1,27 +1,22 @@
-from eemeter.meter import DefaultResidentialMeter
-from eemeter.meter import DataCollection
-from eemeter.models import AverageDailyTemperatureSensitivityModel
-from eemeter.generator import MonthlyBillingConsumptionGenerator
-from eemeter.generator import generate_monthly_billing_datetimes
-from eemeter.consumption import ConsumptionData
-from eemeter.evaluation import Period
-from eemeter.location import Location
-from eemeter.project import Project
+from datetime import datetime
 
-from fixtures.weather import gsod_722880_2012_2014_weather_source
-from fixtures.weather import tmy3_722880_weather_source
+import pytest
+import pytz
 
 from numpy.testing import assert_allclose
-import numpy as np
 from scipy.stats import randint
 
-from datetime import datetime
-import pytz
+from eemeter.evaluation import Period
+from eemeter.generator import (generate_monthly_billing_datetimes,
+                               MonthlyBillingConsumptionGenerator)
+from eemeter.location import Location
+from eemeter.meter import DataCollection, DefaultResidentialMeter
+from eemeter.models import AverageDailyTemperatureSensitivityModel
+from eemeter.project import Project
+
 
 RTOL = 1e-2
 ATOL = 1e-2
-
-import pytest
 
 
 @pytest.fixture(params=[([1, 14.5, 1, 17.8, 8], [1, 14.5, 1], 6849.29, 615.69, 0, 0,

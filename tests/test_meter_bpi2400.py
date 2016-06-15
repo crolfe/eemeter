@@ -1,22 +1,18 @@
-from eemeter.meter import BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria
-from fixtures.weather import tmy3_722880_weather_source
-from fixtures.weather import gsod_722880_2012_2014_weather_source
-
-from eemeter.meter import DataCollection
-
-from eemeter.models import AverageDailyTemperatureSensitivityModel
-from eemeter.generator import generate_monthly_billing_datetimes
-from eemeter.generator import MonthlyBillingConsumptionGenerator
-from eemeter.consumption import ConsumptionData
-from eemeter.evaluation import Period
-
 from datetime import datetime
 
 import pytest
+import pytz
 
 from numpy.testing import assert_allclose
 from scipy.stats import randint
-import pytz
+
+from eemeter.evaluation import Period
+from eemeter.generator import (generate_monthly_billing_datetimes,
+                               MonthlyBillingConsumptionGenerator)
+from eemeter.meter import (BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria,
+                           DataCollection)
+from eemeter.models import AverageDailyTemperatureSensitivityModel
+
 
 RTOL = 1e-2
 ATOL = 1e-2

@@ -1,22 +1,20 @@
-from eemeter.generator import MonthlyBillingConsumptionGenerator
-from eemeter.generator import ProjectGenerator
-from eemeter.generator import generate_monthly_billing_datetimes
-
-from eemeter.evaluation import Period
-from eemeter.models.temperature_sensitivity import AverageDailyTemperatureSensitivityModel
-from eemeter.location import Location
-
-from fixtures.weather import gsod_722880_2012_2014_weather_source
-from fixtures.weather import tmy3_722880_weather_source
-
-import pytest
 from datetime import datetime
-from datetime import timedelta
 
 import numpy as np
+import pytest
+
 from numpy.testing import assert_allclose
+
 from scipy.stats import uniform
 from scipy.stats import randint
+
+from eemeter.evaluation import Period
+from eemeter.generator import (generate_monthly_billing_datetimes,
+                               MonthlyBillingConsumptionGenerator,
+                               ProjectGenerator)
+from eemeter.location import Location
+from eemeter.models import temperature_sensitivity as ts
+
 
 RTOL = 1e-2
 ATOL = 1e-2
@@ -31,7 +29,8 @@ def monthly_datetimes_2012():
 
 @pytest.fixture
 def consumption_generator_no_base_load():
-    model = AverageDailyTemperatureSensitivityModel(heating=True, cooling=True)
+    model = ts.AverageDailyTemperatureSensitivityModel(heating=True,
+                                                       cooling=True)
     params = {
         "base_daily_consumption": 0.0,
         "heating_slope": 1.0,
@@ -46,7 +45,8 @@ def consumption_generator_no_base_load():
 
 @pytest.fixture
 def consumption_generator_with_base_load():
-    model = AverageDailyTemperatureSensitivityModel(heating=True, cooling=True)
+    model = ts.AverageDailyTemperatureSensitivityModel(heating=True,
+                                                       cooling=True)
     params = {
         "base_daily_consumption": 1.0,
         "heating_slope": 1.0,
@@ -87,9 +87,9 @@ def test_consumption_generator_with_base_load(
 def test_project_generator(
         gsod_722880_2012_2014_weather_source,
         tmy3_722880_weather_source):
-    electricity_model = AverageDailyTemperatureSensitivityModel(
+    electricity_model = ts.AverageDailyTemperatureSensitivityModel(
         cooling=True, heating=True)
-    gas_model = AverageDailyTemperatureSensitivityModel(
+    gas_model = ts.AverageDailyTemperatureSensitivityModel(
         cooling=False, heating=True)
     electricity_param_distributions = {
         "cooling_slope": uniform(loc=1, scale=.5),

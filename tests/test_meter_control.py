@@ -1,10 +1,7 @@
-from eemeter.config.yaml_parser import load
-
-from eemeter.meter import Sequence
-from eemeter.meter import Condition
-from eemeter.meter import DataCollection
-
 import pytest
+
+from eemeter.config.yaml_parser import load
+from eemeter.meter import DataCollection
 
 
 def test_sequential_meter():

@@ -1,12 +1,14 @@
+import warnings
+
 from collections import defaultdict
 from datetime import datetime, timedelta
-from lxml import etree
-import os
+
 import pytz
 import six
 
+from lxml import etree
+
 from eemeter.consumption import ConsumptionData
-import warnings
 
 
 class ESPIUsageParser(object):

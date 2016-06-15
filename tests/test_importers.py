@@ -1,26 +1,19 @@
 import tempfile
-import os
-from eemeter.importers import import_hpxml
-from eemeter.importers import import_green_button_xml
-from eemeter.importers import import_seed_timeseries
-from eemeter.importers import import_csv
-from eemeter.importers import import_pandas
-from eemeter.importers import import_excel
 
-from fixtures.importers import consumption_csv_filename
-from fixtures.importers import consumption_xlsx_filename
-from fixtures.importers import consumption_hpxml_filename
-from fixtures.importers import consumption_gbxml_filename
-
-from numpy.testing import assert_allclose
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import pandas as pd
 import numpy as np
 
+from numpy.testing import assert_allclose
 from sqlalchemy import create_engine
-from sqlalchemy import Table, Column, Integer, Float, Numeric, String, MetaData, ForeignKey, TIMESTAMP
+from sqlalchemy import (Table, Column, Integer, Float, Numeric, String,
+                        MetaData, ForeignKey, TIMESTAMP)
+
+from eemeter.importers import (import_csv, import_excel,
+                              import_green_button_xml, import_hpxml,
+                              import_pandas, import_seed_timeseries)
+
 
 RTOL = 1e-2
 ATOL = 1e-2

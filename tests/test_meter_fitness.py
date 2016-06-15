@@ -1,15 +1,14 @@
-from eemeter.config.yaml_parser import load
+import numpy as np
 
+from numpy.testing import assert_allclose
+
+from eemeter.config.yaml_parser import load
 from eemeter.meter import DataCollection
 from eemeter.models import BaseloadHeatingModelParameterType
 
-from numpy.testing import assert_allclose
-import numpy as np
 
 RTOL = 1e-2
 ATOL = 1e-2
-
-import pytest
 
 
 def test_cvrmse():

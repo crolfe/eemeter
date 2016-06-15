@@ -1,27 +1,20 @@
-from eemeter.weather import WeatherSourceBase
-from eemeter.weather import GSODWeatherSource
-from eemeter.weather import ISDWeatherSource
-from eemeter.weather import TMY3WeatherSource
-
-from eemeter.consumption import ConsumptionData
-from eemeter.evaluation import Period
-
-from pkg_resources import resource_stream
-from datetime import datetime
-from datetime import timedelta
-import pytest
-import os
-import warnings
 import tempfile
 
+from datetime import datetime
+
 import numpy as np
+import pytest
 
 from numpy.testing import assert_allclose
+
+from eemeter.weather import (GSODWeatherSource, ISDWeatherSource,
+                             TMY3WeatherSource)
+
 
 RTOL = 1e-1
 ATOL = 1e-1
 
-##### Fixtures #####
+# Fixtures #
 
 
 @pytest.fixture

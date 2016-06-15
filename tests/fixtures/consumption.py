@@ -1,18 +1,16 @@
+from datetime import datetime, timedelta
+
+import numpy as np
+import pytz
 import pytest
+
+from scipy.stats import randint
 
 from eemeter.models import AverageDailyTemperatureSensitivityModel
 from eemeter.consumption import ConsumptionData
 from eemeter.generator import MonthlyBillingConsumptionGenerator
 from eemeter.generator import generate_monthly_billing_datetimes
 from eemeter.evaluation import Period
-
-from .weather import gsod_722880_2012_2014_weather_source
-
-from scipy.stats import randint
-
-from datetime import datetime, timedelta
-import numpy as np
-import pytz
 
 
 @pytest.fixture
@@ -98,13 +96,9 @@ def consumption_generator_2(request):
     return generator, params
 
 
-@pytest.fixture(
-    params=[
-        (Period(
-            datetime(
-                2012, 1, 1, tzinfo=pytz.UTC), datetime(
-                    2014, 12, 31, tzinfo=pytz.UTC)), randint(
-                        30, 31))])
+@pytest.fixture(params=[(Period(datetime(2012, 1, 1, tzinfo=pytz.UTC),
+                                datetime(2014, 12, 31, tzinfo=pytz.UTC)),
+                        randint(30, 31))])
 def generated_consumption_data_1(
         request,
         gsod_722880_2012_2014_weather_source,
@@ -117,13 +111,9 @@ def generated_consumption_data_1(
     return consumption_data, params
 
 
-@pytest.fixture(
-    params=[
-        (Period(
-            datetime(
-                2012, 1, 1, tzinfo=pytz.UTC), datetime(
-                    2014, 12, 31, tzinfo=pytz.UTC)), randint(
-                        30, 31))])
+@pytest.fixture(params=[(Period(datetime(2012, 1, 1, tzinfo=pytz.UTC),
+                                datetime(2014, 12, 31, tzinfo=pytz.UTC)),
+                        randint(30, 31))])
 def generated_consumption_data_2(
         request,
         gsod_722880_2012_2014_weather_source,
@@ -186,21 +176,14 @@ def generated_consumption_data_pre_post_with_annualized_gross_savings_1(
     return cd, params_pre, params_post, retrofit_date, annualized_gross_savings
 
 
-@pytest.fixture(
-    params=[
-        (Period(
-            datetime(
-                2012, 1, 1), datetime(
-                    2012, 12, 31)), 360), (Period(
-                        datetime(
-                            2012, 1, 1), datetime(
-                                2012, 9, 30)), 270), (Period(
-                                    datetime(
-                                        2012, 1, 1), datetime(
-                                            2012, 7, 1)), 180), (Period(
-                                                datetime(
-                                                    2012, 1, 1), datetime(
-                                                        2012, 3, 2)), 60), ])
+@pytest.fixture(params=[(Period(datetime(2012, 1, 1),
+                                datetime(2012, 12, 31)), 360),
+                        (Period(datetime(2012, 1, 1),
+                                datetime(2012, 9, 30)), 270),
+                        (Period(datetime(2012, 1, 1),
+                                datetime(2012, 7, 1)), 180),
+                        (Period(datetime(2012, 1, 1),
+                                datetime(2012, 3, 2)), 60)])
 def time_span_1(request, consumption_generator_1,
                 gsod_722880_2012_2014_weather_source):
     period, n_days = request.param

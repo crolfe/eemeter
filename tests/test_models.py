@@ -1,9 +1,7 @@
-from eemeter.models import AverageDailyTemperatureSensitivityModel
-
-from numpy.testing import assert_allclose
 import numpy as np
 
-import pytest
+from eemeter.models import AverageDailyTemperatureSensitivityModel
+from numpy.testing import assert_allclose
 
 
 def test_average_daily_baseload_heating_cooling_consumption_model():

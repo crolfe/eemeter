@@ -1,9 +1,6 @@
 from unittest import TestCase
 
-from eemeter.uploader.uploaders import ProjectUploader
-from eemeter.uploader.uploaders import ProjectAttributeUploader
-from eemeter.uploader.uploaders import ProjectAttributeKeyUploader
-from eemeter.uploader.uploaders import ConsumptionMetadataUploader
+from eemeter.uploader.uploaders import ProjectUploader, Requester
 
 
 class TestProjectUploader(TestCase):
@@ -26,3 +23,5 @@ class TestProjectUploader(TestCase):
         }
         requester = Requester("https://example.com/", "TOKEN")
         self.uploader = ProjectUploader(requester)
+
+        # TODO: add tests

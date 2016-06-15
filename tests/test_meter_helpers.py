@@ -1,25 +1,16 @@
-from eemeter.config.yaml_parser import load
-
-from eemeter.meter import MeetsThresholds
-from eemeter.meter import EstimatedReadingConsolidationMeter
-
-from eemeter.meter import DataCollection
-
-from eemeter.consumption import ConsumptionData
-
-from fixtures.weather import gsod_722880_2012_2014_weather_source
-from fixtures.weather import tmy3_722880_weather_source
-
 from datetime import datetime
-from datetime import timedelta
+
+import numpy as np
+import pytest
 
 from numpy.testing import assert_allclose
-import numpy as np
+
+from eemeter.config.yaml_parser import load
+from eemeter.consumption import ConsumptionData
+from eemeter.meter import DataCollection
 
 RTOL = 1e-2
 ATOL = 1e-2
-
-import pytest
 
 
 @pytest.fixture(params=[

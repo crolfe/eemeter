@@ -1,8 +1,10 @@
-import inspect
-from collections import defaultdict
-from six import string_types
 import json
-import numpy as np
+import inspect
+
+from collections import defaultdict
+
+from six import string_types
+
 from eemeter.config.yaml_parser import load
 
 try:

@@ -1,13 +1,13 @@
-from eemeter.uploader import uploaders, constants
-from eemeter.uploader.requester import Requester
-from datetime import date, datetime
-from eemeter.location import Location
-from eemeter.evaluation import Period
-from eemeter.consumption import ConsumptionData
-from eemeter.project import Project
+import re
+
+from datetime import datetime
+
 import pandas as pd
 import pytz
-import re
+
+from eemeter.consumption import ConsumptionData
+from eemeter.uploader import constants, uploaders
+from eemeter.uploader.requester import Requester
 
 __all__ = [
     'upload_dicts',

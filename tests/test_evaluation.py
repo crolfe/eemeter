@@ -1,9 +1,6 @@
+from datetime import datetime, timedelta
+
 from eemeter.evaluation import Period
-
-from datetime import datetime
-from datetime import timedelta
-
-import pytest
 
 
 def test_period_both_closed():
