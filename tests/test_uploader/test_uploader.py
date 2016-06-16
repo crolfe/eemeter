@@ -1,6 +1,7 @@
 from unittest import TestCase
 
-from eemeter.uploader.uploaders import ProjectUploader, Requester
+from eemeter.uploader.requester import Requester
+from eemeter.uploader.uploaders import ProjectUploader
 
 
 class TestProjectUploader(TestCase):

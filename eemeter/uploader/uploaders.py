@@ -1,3 +1,5 @@
+import warnings
+
 from . import constants
 
 
@@ -64,7 +66,8 @@ class BaseUploader(object):
 
             if create_response.status_code != 201:
                 message = "Create error POST ({}): {}\n{}\n{}".format(
-                    create_response.status_code, urls["create"], data, create_response.text)
+                    create_response.status_code, urls["create"], data,
+                    create_response.text)
                 raise ValueError(message)
 
             create_response_data = create_response.json()

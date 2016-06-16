@@ -7,6 +7,7 @@ import pytest
 
 from numpy.testing import assert_allclose
 
+from eemeter.consumption import ConsumptionData
 from eemeter.weather import (GSODWeatherSource, ISDWeatherSource,
                              TMY3WeatherSource)
 
@@ -14,22 +15,21 @@ from eemeter.weather import (GSODWeatherSource, ISDWeatherSource,
 RTOL = 1e-1
 ATOL = 1e-1
 
-# Fixtures #
+# Fixtures
 
 
 @pytest.fixture
 def consumption_data_one_summer_electricity():
     records = [
         {
-            "value": 0, "start": datetime(
-                2012, 6, 1), "end": datetime(
-                2012, 7, 1)}, {
-                    "value": 0, "start": datetime(
-                        2012, 7, 1), "end": datetime(
-                            2012, 8, 1)}, {
-                                "value": 0, "start": datetime(
-                                    2012, 8, 1), "end": datetime(
-                                        2012, 9, 1)}]
+            "value": 0, "start": datetime(2012, 6, 1),
+            "end": datetime(2012, 7, 1)},
+        {
+            "value": 0, "start": datetime(2012, 7, 1),
+            "end": datetime(2012, 8, 1)},
+        {
+            "value": 0, "start": datetime(2012, 8, 1),
+            "end": datetime(2012, 9, 1)}]
     return ConsumptionData(
         records,
         "electricity",
@@ -84,8 +84,7 @@ def zipcode_to_station(request):
     return request.param
 
 
-##### Tests #####
-
+# Tests
 @pytest.mark.slow
 def test_gsod_weather_source(periods, gsod_weather_source):
     gsod_weather_source = GSODWeatherSource(*gsod_weather_source)

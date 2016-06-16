@@ -16,8 +16,10 @@ def test_tutorial():
     natural_gas_usage_post = results.get_data(
         "annualized_usage", ["natural_gas", "reporting"]).value
 
+    # TODO: add assertions
     electricity_savings = (electricity_usage_pre -
                            electricity_usage_post) / electricity_usage_pre
+
     natural_gas_savings = (natural_gas_usage_pre -
                            natural_gas_usage_post) / natural_gas_usage_pre
 

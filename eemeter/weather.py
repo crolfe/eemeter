@@ -1,20 +1,22 @@
-from eemeter.evaluation import Period
-from eemeter.location import _load_station_to_lat_lng_index, haversine
-
-from datetime import datetime, date, timedelta
 import ftplib
 import gzip
-from io import BytesIO
 import json
+import logging
 import os
-from pkg_resources import resource_stream
 import warnings
+
+from datetime import datetime, date, timedelta
+from pkg_resources import resource_stream
+from io import BytesIO
 
 import numpy as np
 import pandas as pd
-from pandas.core.common import is_list_like
 import requests
-import logging
+
+from pandas.core.common import is_list_like
+from eemeter.evaluation import Period
+from eemeter.location import _load_station_to_lat_lng_index, haversine
+
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +43,8 @@ class NOAAClient(object):
         raise RuntimeError("Couldn't establish an FTP connection.")
 
     def _load_station_index(self):
-        with resource_stream('eemeter.resources', 'GSOD-ISD_station_index.json') as f:
+        filename = 'GSOD-ISD_station_index.json'
+        with resource_stream('eemeter.resources', filename) as f:
             return json.loads(f.read().decode("utf-8"))
 
     def _get_potential_station_ids(self, station):
@@ -646,7 +649,6 @@ class NOAAWeatherSourceBase(CachedWeatherSourceBase):
             self.add_year(yesterday.year, force=True)
 
     def _fetch_period(self, period):
-        years = []
         if period.start is not None and period.end is not None:
             self.add_year_range(period.start.year, period.end.year)
         elif period.start is not None:

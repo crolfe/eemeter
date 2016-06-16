@@ -268,7 +268,6 @@ def import_pandas(df):
         "therms": "therm",
     }
 
-    consumptions = []
     fuel_type = None
     unit_name = None
     records = []

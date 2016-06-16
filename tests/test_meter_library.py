@@ -259,7 +259,9 @@ def test_normal_annual_cdd(tmy3_722880_weather_source):
 def test_n_periods_meeting_hdd_per_day_threshold(
         generated_consumption_data_with_n_periods_hdd_1,
         gsod_722880_2012_2014_weather_source):
-    cd, n_periods_lt, n_periods_gt, hdd = generated_consumption_data_with_n_periods_hdd_1
+
+    data = generated_consumption_data_with_n_periods_hdd_1
+    cd, n_periods_lt, n_periods_gt, hdd = data
     meter_lt = NPeriodsMeetingHDDPerDayThreshold(
         base=65, temperature_unit_str="degF", operation="<")
     meter_gt = NPeriodsMeetingHDDPerDayThreshold(
@@ -279,7 +281,9 @@ def test_n_periods_meeting_hdd_per_day_threshold(
 def test_n_periods_meeting_cdd_per_day_threshold(
         generated_consumption_data_with_n_periods_cdd_1,
         gsod_722880_2012_2014_weather_source):
-    cd, n_periods_lt, n_periods_gt, cdd = generated_consumption_data_with_n_periods_cdd_1
+
+    data = generated_consumption_data_with_n_periods_cdd_1
+    cd, n_periods_lt, n_periods_gt, cdd = data
     meter_lt = NPeriodsMeetingCDDPerDayThreshold(
         base=65, temperature_unit_str="degF", operation="<")
     meter_gt = NPeriodsMeetingCDDPerDayThreshold(
@@ -385,7 +389,7 @@ def test_downsample_consumption_data(
     assert cd_down.data.shape == (2500,)
 
     assert cd_down.estimated["2015-01-01 00:00"]
-    assert cd_down.estimated["2015-01-01 01:00"] == False
+    assert not cd_down.estimated["2015-01-01 01:00"]
     assert cd_down.estimated.shape == (2500,)
 
 
@@ -417,6 +421,21 @@ def test_project_attributes(generated_consumption_data_1):
     assert result["weather_normal_source"].station_id == "722880"
 
 
+# TODO: rename or merge into test_project_attributes above
+def test_project_attributes_2(generated_consumption_data_1):
+    cd, params = generated_consumption_data_1
+    baseline_period = Period(datetime(2014, 1, 1), datetime(2014, 1, 1))
+    location = Location(zipcode="91104")
+    project = Project(location, [cd, cd], baseline_period, None)
+    meter = ProjectFuelTypes(project)
+    result = meter.evaluate_raw(project=project)
+    assert len(result["fuel_types"]) == 2
+    assert result["fuel_types"][0]["value"] == "electricity"
+    assert result["fuel_types"][0]["tags"] == ["electricity"]
+    assert result["fuel_types"][1]["value"] == "electricity"
+    assert result["fuel_types"][1]["tags"] == ["electricity"]
+
+
 def test_project_consumption_baseline_reporting(generated_consumption_data_1):
     cd, _ = generated_consumption_data_1
     baseline_period = Period(datetime(2011, 1, 1), datetime(2013, 6, 1))
@@ -439,15 +458,3 @@ def test_project_consumption_baseline_reporting(generated_consumption_data_1):
     assert result["consumption"][1]["tags"][1] == "reporting"
 
 
-def test_project_attributes(generated_consumption_data_1):
-    cd, params = generated_consumption_data_1
-    baseline_period = Period(datetime(2014, 1, 1), datetime(2014, 1, 1))
-    location = Location(zipcode="91104")
-    project = Project(location, [cd, cd], baseline_period, None)
-    meter = ProjectFuelTypes(project)
-    result = meter.evaluate_raw(project=project)
-    assert len(result["fuel_types"]) == 2
-    assert result["fuel_types"][0]["value"] == "electricity"
-    assert result["fuel_types"][0]["tags"] == ["electricity"]
-    assert result["fuel_types"][1]["value"] == "electricity"
-    assert result["fuel_types"][1]["tags"] == ["electricity"]

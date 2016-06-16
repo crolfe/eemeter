@@ -7,7 +7,7 @@ from numpy.testing import assert_allclose
 
 from eemeter.config.yaml_parser import load
 from eemeter.consumption import ConsumptionData
-from eemeter.meter import DataCollection
+from eemeter.meter import DataCollection, Debug
 
 RTOL = 1e-2
 ATOL = 1e-2
@@ -113,3 +113,4 @@ def test_debug_meter():
         }
         """
     meter = load(meter_yaml)
+    assert isinstance(meter, Debug)

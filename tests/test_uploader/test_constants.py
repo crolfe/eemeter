@@ -5,7 +5,7 @@ from unittest import TestCase
 class ConstantsTestCase(TestCase):
 
     def test_STANDARD_PROJECT_ATTRIBUTE_KEYS(self):
-        for column_name, data in constants.STANDARD_PROJECT_ATTRIBUTE_KEYS.items():
+        for data in constants.STANDARD_PROJECT_ATTRIBUTE_KEYS.values():
             assert "name" in data
             assert "display_name" in data
             assert data["data_type"] in ["FLOAT", "INTEGER", "DATE",

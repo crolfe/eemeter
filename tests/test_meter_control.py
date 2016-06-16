@@ -123,7 +123,7 @@ def test_switch():
     assert 2 == result2.get_data("result").value
     assert 3 == result3.get_data("result").value
     assert 4 == result4.get_data("result").value
-    assert None == result5.get_data("result")
+    assert result5.get_data("result") is None
 
 
 def test_for():

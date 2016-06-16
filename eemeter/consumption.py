@@ -1,13 +1,18 @@
-from . import ureg, Q_
-
-from datetime import datetime
-import pandas as pd
-import numpy as np
-from warnings import warn
-import pytz
 import copy
 
+from datetime import datetime
+from warnings import warn
+
+import numpy as np
+import pandas as pd
+import pytz
+
 from eemeter.evaluation import Period
+from . import ureg, Q_
+
+
+DAY_IN_SECONDS = 8.64e4
+DAY_IN_NANOSECONDS = 8.64e13
 
 
 class ConsumptionData(object):
@@ -32,7 +37,8 @@ class ConsumptionData(object):
 
         See `record_type` for details.
 
-    fuel_type : str, {"electricity", "natural_gas", "fuel_oil", "propane", "liquid_propane", "kerosene", "diesel", "fuel_cell"}
+    fuel_type : str, {"electricity", "natural_gas", "fuel_oil", "propane",
+                      "liquid_propane", "kerosene", "diesel", "fuel_cell"}
         The fuel type of the consumption data.
     unit_name : str, {"kWh", "therm"}
         The name of the unit in which the consumption data is given.
@@ -183,7 +189,7 @@ class ConsumptionData(object):
                       "pulse": datetime(2014, 1, 1, 3, 6, 12, tzinfo=pytz.utc),
                   },
                   {
-                      "pulse": datetime(2014, 1, 1, 12, 1, 44, tzinfo=pytz.utc),
+                      "pulse": datetime(2014, 1, 1, 2, 1, 44, tzinfo=pytz.utc),
                   },
                   {
                       "pulse": datetime(2014, 1, 1, 17, 1, 4, tzinfo=pytz.utc),
@@ -227,8 +233,8 @@ class ConsumptionData(object):
         For initializing with pre-parsed consumption data. Please also set
         records=None.
     estimated : str, default None
-        For initializing with pre-parsed estimation data (boolean). Please also
-        set records=None.
+        For initializing with pre-parsed estimation data (boolean).
+        Please also set records=None.
     """
 
     # target_unit must be one of "kWh" or "therm"
@@ -321,9 +327,9 @@ class ConsumptionData(object):
 
         # import data directly (skipping record parsing) if available.
         if data is not None:
-            if not records is None:
-                message = "Please provide either data or records, but not both."
-                raise ValueError(message)
+            if records is not None:
+                msg = "Please provide either data or records, but not both."
+                raise ValueError(msg)
             if estimated is None:
                 message = "Please provide the the `estimated` attribute," \
                     " which contains boolean values indicating whether" \
@@ -633,13 +639,15 @@ class ConsumptionData(object):
             avgs, n_days = [], []
             for v, ns in zip(self.data, np.diff(self.data.index)):
                 # nanoseconds to days
-                days = ns.astype('d') / 8.64e13
+                days = ns.astype('d') / DAY_IN_NANOSECONDS
                 avgs.append(v / days)
                 n_days.append(days)
             return np.array(avgs), np.array(n_days)
         else:
-            days = self.freq_timedelta.days + self.freq_timedelta.seconds / 8.64e4
+            tdelta = self.freq_timedelta
+            days = tdelta.days + tdelta.seconds / DAY_IN_SECONDS
             avgs, n_days = [], []
+
             for v in self.data:
                 avgs.append(v / days)
                 n_days.append(days)
@@ -676,14 +684,16 @@ class ConsumptionData(object):
             return 0
         else:
             tdelta = period.timedelta
-            return tdelta.days + tdelta.seconds / 8.64e4
+            return tdelta.days + tdelta.seconds / DAY_IN_SECONDS
 
     def records(self, record_type="arbitrary"):
         """ Records representing this data (in the format of input records).
 
         Parameters
         ----------
-        record_type : str, { "interval", "arbitrary", "pulse", "billing", "arbitrary_start", "billing_start", "arbitrary_end", "billing_end" }
+        record_type : str, { "interval", "arbitrary", "pulse", "billing",
+                             "arbitrary_start", "billing_start",
+                             "arbitrary_end", "billing_end" }
             Way in which the data should be represented.
 
         Returns
@@ -826,12 +836,14 @@ class ConsumptionData(object):
                 if timedelta < target_period:
 
                     # Found a short period. Need to resample.
-                    consumption_resampled = ConsumptionData(
-                        [], self.fuel_type, self.unit_name, record_type="arbitrary")
-                    consumption_resampled.data = self.data.resample(freq).sum()
-                    consumption_resampled.estimated = self.estimated.resample(
-                        freq).median().astype(bool)
-                    return consumption_resampled
+                    resampled = ConsumptionData([], self.fuel_type,
+                                                self.unit_name,
+                                                record_type="arbitrary")
+                    resampled.data = self.data.resample(freq).sum()
+                    est = self.estimated.resample(freq).median().astype(bool)
+                    resampled.estimated = est
+
+                    return resampled
 
         # Periods are all greater than or equal to downsample target, so just
         # return copy of self.

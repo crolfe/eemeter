@@ -271,7 +271,7 @@ def consumption_data_kWh_arbitrary():
         "kWh",
         record_type="arbitrary")
 
-##### tests #####
+# tests
 
 
 def test_consumption_data_interval_start_daily_all_has_correct_attributes(
@@ -291,21 +291,15 @@ def test_consumption_data_interval_start_daily_all_has_correct_attributes(
 def test_consumption_data_interval_start_daily_all_invalid_fuel_type(
         records_interval_end_daily_all, unit_name):
     with pytest.raises(ValueError):
-        cd = ConsumptionData(
-            records_interval_end_daily_all,
-            "invalid",
-            unit_name,
-            freq="D")
+        ConsumptionData(records_interval_end_daily_all, "invalid",
+                        unit_name, freq="D")
 
 
 def test_consumption_data_interval_start_daily_all_invalid_unit_name(
         records_interval_end_daily_all, fuel_type):
     with pytest.raises(ValueError):
-        cd = ConsumptionData(
-            records_interval_end_daily_all,
-            fuel_type,
-            "invalid",
-            freq="D")
+        ConsumptionData(records_interval_end_daily_all, fuel_type,
+                        "invalid", freq="D")
 
 
 def test_consumption_data_interval_start_daily_all_freq_D(
@@ -352,8 +346,8 @@ def test_consumption_data_interval_end_daily_all_freq_12H(
 def test_consumption_data_interval_start_daily_missing_start_key_freq_D(
         records_interval_start_daily_missing_start_key, fuel_type, unit_name):
     with pytest.raises(ValueError):
-        cd = ConsumptionData(records_interval_start_daily_missing_start_key,
-                             fuel_type, unit_name, freq="D")
+        ConsumptionData(records_interval_start_daily_missing_start_key,
+                        fuel_type, unit_name, freq="D")
 
 
 def test_consumption_data_interval_start_daily_missing_date_freq_D(
@@ -834,7 +828,7 @@ def test_downsample_fifteen_min():
     assert cd.data.shape == (10000,)
 
     assert cd.estimated["2015-01-01 00:00:00"]
-    assert cd.estimated["2015-01-01 00:15:00"] == False
+    assert not cd.estimated["2015-01-01 00:15:00"]
     assert cd.estimated.shape == (10000,)
 
     assert_allclose(cd_down.data["2015-01-01"], 9.2)
@@ -843,7 +837,7 @@ def test_downsample_fifteen_min():
     assert cd_down.data.shape == (105,)
     assert np.isnan(cd_down.data["2015-01-12"])
 
-    assert cd_down.estimated["2015-01-02"] == False
+    assert not cd_down.estimated["2015-01-02"]
     assert cd_down.estimated["2015-01-24"]
     assert cd_down.estimated.shape == (105,)
 
@@ -909,7 +903,7 @@ def test_downsample_hourly_frequency():
     assert cd.data.shape == (10000,)
 
     assert cd.estimated["2015-01-01 00:00:00"]
-    assert cd.estimated["2015-01-01 00:15:00"] == False
+    assert not cd.estimated["2015-01-01 00:15:00"]
     assert cd.estimated.shape == (10000,)
 
     assert_allclose(cd_down.data["2015-01-01 00:00"], 0.3)
@@ -917,5 +911,5 @@ def test_downsample_hourly_frequency():
     assert cd_down.data.shape == (2500,)
 
     assert cd_down.estimated["2015-01-01 00:00"]
-    assert cd_down.estimated["2015-01-01 01:00"] == False
+    assert not cd_down.estimated["2015-01-01 01:00"]
     assert cd_down.estimated.shape == (2500,)

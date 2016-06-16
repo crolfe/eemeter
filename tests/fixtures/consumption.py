@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta as td
 
 import numpy as np
 import pytz
@@ -48,7 +48,7 @@ def consumption_data_1():
 @pytest.fixture
 def consumption_data_15min():
     records = [{
-        "start": datetime(2015, 1, 1, tzinfo=pytz.UTC) + timedelta(seconds=i * 900),
+        "start": datetime(2015, 1, 1, tzinfo=pytz.UTC) + td(seconds=i * 900),
         "value": np.nan if i % 30 == 0 or 1000 < i < 2000 else 0.1,
         "estimated": i % 3 == 0 or 2000 < i < 3000,
     } for i in range(10000)]
@@ -257,8 +257,10 @@ def generated_consumption_data_with_cdd_1(
 
 
 @pytest.fixture(params=[
-    ([0, 1, 65, 1, 75], Period(datetime(2012, 1, 1), datetime(2012, 12, 31)), 5, 7, 1),
-    ([10, 2, 61, 1, 73], Period(datetime(2012, 1, 1), datetime(2013, 12, 31)), 11, 13, 1)
+    ([0, 1, 65, 1, 75], Period(datetime(2012, 1, 1), datetime(2012, 12, 31)),
+     5, 7, 1),
+    ([10, 2, 61, 1, 73], Period(datetime(2012, 1, 1), datetime(2013, 12, 31)),
+     11, 13, 1)
 ])
 def generated_consumption_data_with_n_periods_hdd_1(
         request, gsod_722880_2012_2014_weather_source):
@@ -282,10 +284,14 @@ def generated_consumption_data_with_n_periods_hdd_1(
 
 
 @pytest.fixture(params=[
-    ([0, 1, 65, 1, 75], Period(datetime(2012, 1, 1), datetime(2012, 12, 31)), 10, 2, 10),
-    ([10, 2, 61, 1, 73], Period(datetime(2012, 1, 1), datetime(2014, 12, 31)), 12, 24, 1),
-    ([10, 2, 61, 1, 73], Period(datetime(2012, 1, 1), datetime(2012, 12, 27)), 5, 7, 1),
-    ([10, 2, 61, 1, 73], Period(datetime(2012, 12, 27), datetime(2014, 12, 31)), 7, 17, 1)
+    ([0, 1, 65, 1, 75], Period(datetime(2012, 1, 1), datetime(2012, 12, 31)),
+     10, 2, 10),
+    ([10, 2, 61, 1, 73], Period(datetime(2012, 1, 1), datetime(2014, 12, 31)),
+     12, 24, 1),
+    ([10, 2, 61, 1, 73], Period(datetime(2012, 1, 1), datetime(2012, 12, 27)),
+     5, 7, 1),
+    ([10, 2, 61, 1, 73],
+     Period(datetime(2012, 12, 27), datetime(2014, 12, 31)), 7, 17, 1)
 ])
 def generated_consumption_data_with_n_periods_cdd_1(
         request, gsod_722880_2012_2014_weather_source):

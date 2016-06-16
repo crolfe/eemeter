@@ -225,8 +225,7 @@ def upload_dataframes2(
         for consumption_record_data in consumption_records_data:
             consumption_record_data["metadata"] = consumption_metadata_id
 
-        consumption_records_response_data = consumption_record_uploader.bulk_sync(
-            consumption_records_data)
+        consumption_record_uploader.bulk_sync(consumption_records_data)
 
 
 def upload_dataframes(
@@ -326,8 +325,8 @@ def upload_dataframes(
         for consumption_record_data in consumption_records_data:
             consumption_record_data["metadata"] = consumption_metadata_id
 
-        consumption_records_response_data = consumption_record_uploader.sync(
-            consumption_records_data)
+        # TODO: do we need to do anything with the response here?
+        consumption_record_uploader.sync(consumption_records_data)
 
 
 def _dicts_to_dataframes(project_dict, consumption_dict):
@@ -459,7 +458,7 @@ def _get_project_attribute_data(row, project_attribute_key_data):
         project_attribute_data["date_value"] = row[name]
     elif data_type == "DATETIME":
         # check format, but keep as string
-        dt = datetime.strptime(row[name], "%Y-%m-%dT%H:%M:%S%z")
+        datetime.strptime(row[name], "%Y-%m-%dT%H:%M:%S%z")
         project_attribute_data["datetime_value"] = row[name]
     elif data_type == "FLOAT":
         project_attribute_data["float_value"] = float(row[name])

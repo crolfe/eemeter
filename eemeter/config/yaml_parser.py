@@ -99,7 +99,7 @@ def initialize():
     yaml.add_multi_representer(MeterBase, multi_representer_obj)
     yaml.add_multi_representer(Model, multi_representer_obj)
 
-    is_initialized = True
+    is_initialized = True  # NOQA
 
 
 def multi_constructor_obj(loader, tag_suffix, node):

@@ -122,7 +122,7 @@ def zipcode_station(request):
 def lat_lng_zipcode_station(request):
     return request.param
 
-##### TESTS #####
+# TESTS
 
 
 def test_haversine(lat_lng_dist):

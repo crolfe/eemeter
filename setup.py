@@ -2,7 +2,7 @@ from setuptools import setup, find_packages, Command
 
 version = __import__('eemeter').get_version()
 
-long_description = "Standard methods for calculating energy efficiency savings."
+long_desc = "Standard methods for calculating energy efficiency savings."
 
 
 class PyTest(Command):
@@ -30,7 +30,7 @@ class PyTest(Command):
 setup(name='eemeter',
       version=version,
       description='Open Energy Efficiency Meter',
-      long_description=long_description,
+      long_description=long_desc,
       url='https://github.com/impactlab/eemeter/',
       author='Matt Gee, Phil Ngo, Eric Potash',
       license='MIT',

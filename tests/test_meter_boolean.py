@@ -6,7 +6,7 @@ import pytest
 
 def test_and_meter():
     with pytest.raises(ValueError):
-        meter0 = And(inputs=[])
+        And(inputs=[])
 
     meter1 = And(inputs=["result_one"])
     assert meter1.evaluate_raw(result_one=True, result_two=True)["output"]
@@ -31,7 +31,7 @@ def test_and_meter():
 
 def test_or_meter():
     with pytest.raises(ValueError):
-        meter0 = Or(inputs=[])
+        Or(inputs=[])
 
     meter1 = Or(inputs=["result_one"])
     assert meter1.evaluate_raw(result_one=True, result_two=True)["output"]

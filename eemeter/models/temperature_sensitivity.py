@@ -1,8 +1,10 @@
-import scipy.optimize as opt
-import numpy as np
-from .parameters import ParameterType
 import inspect
 import warnings
+
+import scipy.optimize as opt
+import numpy as np
+
+from .parameters import ParameterType
 
 
 class BaseloadModelParameterType(ParameterType):

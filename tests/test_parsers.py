@@ -1,12 +1,15 @@
-from eemeter.parsers import ESPIUsageParser
+import os
+import tempfile
+
+from datetime import datetime
 
 import pytest
-from numpy.testing import assert_allclose
-import tempfile
-import os
-import six
-from datetime import datetime
 import pytz
+import six
+
+from numpy.testing import assert_allclose
+
+from eemeter.parsers import ESPIUsageParser
 
 
 @pytest.fixture
@@ -49,6 +52,7 @@ def test_init(natural_gas_xml):
         natural_gas_parser = ESPIUsageParser(f)
         timezone = natural_gas_parser.get_timezone()
 
+    # TODO: add assertions
     # read from filepath
     natural_gas_parser = ESPIUsageParser(filepath)
     timezone = natural_gas_parser.get_timezone()
@@ -60,13 +64,13 @@ def test_local_time_parameters(natural_gas_parser):
 
 
 def test_get_usage_point_entry_element(natural_gas_parser):
-    usage_point_entry_element = natural_gas_parser.get_usage_point_entry_element()
-    assert usage_point_entry_element.tag == "{http://www.w3.org/2005/Atom}entry"
+    element = natural_gas_parser.get_usage_point_entry_element()
+    assert element.tag == "{http://www.w3.org/2005/Atom}entry"
 
 
 def test_get_meter_reading_entry_element(natural_gas_parser):
-    meter_reading_entry_element = natural_gas_parser.get_meter_reading_entry_element()
-    assert meter_reading_entry_element.tag == "{http://www.w3.org/2005/Atom}entry"
+    element = natural_gas_parser.get_meter_reading_entry_element()
+    assert element.tag == "{http://www.w3.org/2005/Atom}entry"
 
 
 def test_get_usage_summary_entry_elements(natural_gas_parser):
@@ -75,7 +79,8 @@ def test_get_usage_summary_entry_elements(natural_gas_parser):
 
 
 def test_get_reading_type_interval_block_groups(electricity_parser):
-    data = [ib for ib in electricity_parser.get_reading_type_interval_block_groups()]
+    parser = electricity_parser
+    data = [ib for ib in parser.get_reading_type_interval_block_groups()]
     assert len(data) == 2  # ignores second two
     assert data[0]['reading_type']['uom'] == 'Wh'
     assert data[0]['reading_type']['interval_length'].total_seconds() == 3600
@@ -112,10 +117,10 @@ def test_get_consumption_records(natural_gas_parser):
     assert record['start'].tzinfo.zone == 'UTC'
     assert record['fuel_type'] == 'natural_gas'
     assert_allclose(record['value'], 1.0365954, rtol=1e-3, atol=1e-3)
-    assert record['estimated'] == False
+    assert not record['estimated']
 
 
-def test_get_consumption_data_objects(natural_gas_parser):
+def test_get_consumption_data_objects_natural_gas(natural_gas_parser):
     cds = [cd for cd in natural_gas_parser.get_consumption_data_objects()]
     assert len(cds) == 1
     cd = cds[0]
@@ -125,7 +130,7 @@ def test_get_consumption_data_objects(natural_gas_parser):
     assert cd.unit_name == "therm"
 
 
-def test_get_consumption_data_objects(electricity_parser):
+def test_get_consumption_data_objects_electricity(electricity_parser):
     cds = [cd for cd in electricity_parser.get_consumption_data_objects()]
     assert len(cds) == 1
     cd = cds[0]
@@ -139,7 +144,7 @@ def test_get_consumption_data_objects(electricity_parser):
     assert cd.unit_name == "kWh"
 
 
-def test_get_consumption_data_objects_2(electricity_parser_2):
+def test_get_consumption_data_objects_electricity_2(electricity_parser_2):
     cds = [cd for cd in electricity_parser_2.get_consumption_data_objects()]
     assert len(cds) == 1
     cd = cds[0]

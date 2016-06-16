@@ -96,7 +96,8 @@ class AnnualizedUsageMeter(MeterBase):
         model_params : object
             Parameters in a format recognized by the model
             `compute_usage_estimates` method.
-        weather_normal_source : eemeter.weather.WeatherBase and eemeter.weather.WeatherNormalMixin
+        weather_normal_source : eemeter.weather.WeatherBase and
+            eemeter.weather.WeatherNormalMixin
             Weather normal data source. Should be from a location (station) as
             geographically and climatically similar to project as possible.
 
