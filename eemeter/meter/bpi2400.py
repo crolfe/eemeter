@@ -1,336 +1,8 @@
 from eemeter.meter.base import YamlDefinedMeter
 
-# TODO: load from external file?
 
-bpi_meter_yaml = """
-!obj:eemeter.meter.Sequence {
-    sequence: [
-        !obj:eemeter.meter.EstimatedReadingConsolidationMeter {
-            input_mapping: { consumption_data: {} },
-            output_mapping: { consumption_data_no_estimated: {} },
-        },
-        !obj:eemeter.meter.NormalAnnualHDD {
-            base: !setting hdd_base,
-            temperature_unit_str: !setting temperature_unit_str,
-            input_mapping: { weather_normal_source: {} },
-            output_mapping: { normal_annual_hdd: { name: hdd_tmy } },
-        },
-        !obj:eemeter.meter.NormalAnnualCDD {
-            base: !setting cdd_base,
-            temperature_unit_str: !setting temperature_unit_str,
-            input_mapping: { weather_normal_source: {} },
-            output_mapping: { normal_annual_cdd: { name: cdd_tmy } },
-        },
-        !obj:eemeter.meter.RecentReadingMeter {
-            input_mapping: {
-                consumption_data: { name: consumption_data_no_estimated }
-            },
-            output_mapping: { n_days: { name: n_days_since_reading } }
-        },
-        !obj:eemeter.meter.TimeSpanMeter {
-            input_mapping: { consumption_data: { name: consumption_data_no_estimated } },
-            output_mapping: { time_span: {} }
-        },
-        !obj:eemeter.meter.TotalHDDMeter {
-            base: !setting hdd_base,
-            temperature_unit_str: !setting temperature_unit_str,
-            input_mapping: {
-                consumption_data: { name: consumption_data_no_estimated },
-                weather_source: {},
-            },
-            output_mapping: { total_hdd: {} }
-        },
-        !obj:eemeter.meter.TotalCDDMeter {
-            base: !setting cdd_base,
-            temperature_unit_str: !setting temperature_unit_str,
-            input_mapping: {
-                consumption_data: { name: consumption_data_no_estimated },
-                weather_source: {},
-            },
-            output_mapping: { total_cdd: {} }
-        },
-        !obj:eemeter.meter.NPeriodsMeetingHDDPerDayThreshold {
-            base: !setting hdd_base,
-            temperature_unit_str: !setting temperature_unit_str,
-            operation: ">",
-            proportion: 0.0032876712,
-            input_mapping: {
-                consumption_data: { name: consumption_data_no_estimated },
-                weather_source: {},
-                hdd: { name: hdd_tmy, },
-            },
-            output_mapping: { n_periods: { name: n_periods_high_hdd_per_day }, }
-        },
-        !obj:eemeter.meter.NPeriodsMeetingHDDPerDayThreshold {
-            base: !setting hdd_base,
-            temperature_unit_str: !setting temperature_unit_str,
-            operation: "<",
-            proportion: .00054794521,
-            input_mapping: {
-                consumption_data: { name: consumption_data_no_estimated },
-                weather_source: {},
-                hdd: { name: hdd_tmy, },
-            },
-            output_mapping: { n_periods: { name: n_periods_low_hdd_per_day }, }
-        },
-        !obj:eemeter.meter.NPeriodsMeetingCDDPerDayThreshold {
-            base: !setting cdd_base,
-            temperature_unit_str: !setting temperature_unit_str,
-            operation: ">",
-            proportion: 0.0032876712,
-            input_mapping: {
-                consumption_data: { name: consumption_data_no_estimated },
-                weather_source: {},
-                cdd: { name: cdd_tmy, },
-            },
-            output_mapping: { n_periods: { name: n_periods_high_cdd_per_day }, }
-        },
-        !obj:eemeter.meter.NPeriodsMeetingCDDPerDayThreshold {
-            base: !setting cdd_base,
-            temperature_unit_str: !setting temperature_unit_str,
-            operation: "<",
-            proportion: .00054794521,
-            input_mapping: {
-                consumption_data: { name: consumption_data_no_estimated },
-                weather_source: {},
-                cdd: { name: cdd_tmy, },
-            },
-            output_mapping: { n_periods: { name: n_periods_low_cdd_per_day}, }
-        },
-        !obj:eemeter.meter.ConsumptionDataAttributes {
-            input_mapping: { consumption_data: { name: consumption_data_no_estimated, }, },
-            output_mapping: {
-                fuel_type: {},
-                unit_name: { name: energy_unit_str }
-            }
-        },
-        !obj:eemeter.meter.Switch {
-            target: { name: fuel_type },
-            cases: {
-                electricity: !obj:eemeter.meter.TemperatureSensitivityParameterOptimizationMeter {
-                    temperature_unit_str: !setting temperature_unit_str,
-                    model: !obj:eemeter.models.AverageDailyTemperatureSensitivityModel {
-                        cooling: True,
-                        heating: True,
-                        initial_params: {
-                            base_daily_consumption: !setting electricity_baseload_x0,
-                            heating_slope: !setting electricity_heating_slope_x0,
-                            cooling_slope: !setting electricity_cooling_slope_x0,
-                            heating_balance_temperature: !setting heating_balance_temp_x0,
-                            cooling_balance_temperature: !setting cooling_balance_temp_x0,
-                        },
-                        param_bounds: {
-                            base_daily_consumption: [!setting electricity_baseload_low, !setting electricity_baseload_high],
-                            heating_slope: [!setting electricity_heating_slope_low, !setting electricity_heating_slope_high],
-                            cooling_slope: [!setting electricity_heating_slope_low, !setting electricity_cooling_slope_high],
-                            heating_balance_temperature: [!setting heating_balance_temp_low, !setting heating_balance_temp_high],
-                            cooling_balance_temperature: [!setting cooling_balance_temp_low, !setting cooling_balance_temp_high],
-                        },
-                    },
-                    input_mapping: {
-                        consumption_data: { name: consumption_data_no_estimated, },
-                        weather_source: {},
-                        energy_unit_str: {},
-                    },
-                    output_mapping: {
-                        average_daily_usages: { name: average_daily_usages_bpi2400 },
-                        estimated_average_daily_usages: { name: estimated_average_daily_usages_bpi2400 },
-                        temp_sensitivity_params: { name: temp_sensitivity_params_bpi2400 },
-                    },
-                },
-                natural_gas: !obj:eemeter.meter.TemperatureSensitivityParameterOptimizationMeter {
-                    temperature_unit_str: !setting temperature_unit_str,
-                    model: !obj:eemeter.models.AverageDailyTemperatureSensitivityModel {
-                        cooling: False,
-                        heating: True,
-                        initial_params: {
-                            base_daily_consumption: !setting natural_gas_baseload_x0,
-                            heating_slope: !setting natural_gas_heating_slope_x0,
-                            heating_balance_temperature: !setting heating_balance_temp_x0,
-                        },
-                        param_bounds: {
-                            base_daily_consumption: [!setting natural_gas_baseload_low, !setting natural_gas_baseload_high],
-                            heating_slope: [!setting natural_gas_heating_slope_low, !setting natural_gas_heating_slope_high],
-                            heating_balance_temperature: [!setting heating_balance_temp_low, !setting heating_balance_temp_high],
-                        },
-                    },
-                    input_mapping: {
-                        consumption_data: { name: consumption_data_no_estimated, },
-                        weather_source: {},
-                        energy_unit_str: {},
-                    },
-                    output_mapping: {
-                        average_daily_usages: { name: average_daily_usages_bpi2400 },
-                        estimated_average_daily_usages: { name: estimated_average_daily_usages_bpi2400 },
-                        temp_sensitivity_params: { name: temp_sensitivity_params_bpi2400 },
-                    },
-                },
-            },
-        },
-        !obj:eemeter.meter.CVRMSE {
-            input_mapping: {
-                y: { name: average_daily_usages_bpi2400 },
-                y_hat: { name: estimated_average_daily_usages_bpi2400 },
-                params: { name: temp_sensitivity_params_bpi2400 },
-            },
-            output_mapping: { cvrmse: {} },
-        },
-        !obj:eemeter.meter.Switch {
-            target: { name: fuel_type },
-            cases: {
-                electricity: !obj:eemeter.meter.MeetsThresholds {
-                    equations: [
-                        [time_span, ">=", 1, 330, 0, spans_330_days],
-                        [time_span, ">", 1, 184, 0, spans_184_days],
-                        [total_hdd, ">", .5, hdd_tmy, 0, has_enough_total_hdd],
-                        [total_cdd, ">", .5, cdd_tmy, 0, has_enough_total_cdd],
-                        [n_days_since_reading, "<", 1, 360, 0, has_recent_reading],
-                        [n_periods_high_hdd_per_day, ">=", 1, 1, 0, has_enough_periods_with_high_hdd_per_day],
-                        [n_periods_low_hdd_per_day, ">=", 1, 1, 0, has_enough_periods_with_low_hdd_per_day],
-                        [n_periods_high_cdd_per_day, ">=", 1, 1, 0, has_enough_periods_with_high_cdd_per_day],
-                        [n_periods_low_cdd_per_day, ">=", 1, 1, 0, has_enough_periods_with_low_cdd_per_day],
-                        [cvrmse, "<=", 1, 20, 0, meets_cvrmse_limit],
-                    ],
-                    input_mapping: {
-                        time_span: {},
-                        total_hdd: {},
-                        hdd_tmy: {},
-                        total_cdd: {},
-                        cdd_tmy: {},
-                        n_days_since_reading: {},
-                        n_periods_high_hdd_per_day: {},
-                        n_periods_low_hdd_per_day: {},
-                        n_periods_high_cdd_per_day: {},
-                        n_periods_low_cdd_per_day: {},
-                        cvrmse: {},
-                    },
-                    output_mapping: {
-                        spans_330_days: {},
-                        spans_184_days: {},
-                        has_enough_total_hdd: {},
-                        has_enough_total_cdd: {},
-                        has_recent_reading: {},
-                        has_enough_periods_with_high_hdd_per_day: {},
-                        has_enough_periods_with_low_hdd_per_day: {},
-                        has_enough_periods_with_high_cdd_per_day: {},
-                        has_enough_periods_with_low_cdd_per_day: {},
-                        meets_cvrmse_limit: {},
-                    },
-                },
-                natural_gas: !obj:eemeter.meter.MeetsThresholds {
-                    equations: [
-                        [time_span, ">=", 1, 330, 0, spans_330_days],
-                        [time_span, ">", 1, 184, 0, spans_184_days],
-                        [total_hdd, ">", .5, hdd_tmy, 0, has_enough_total_hdd],
-                        [n_days_since_reading, "<", 1, 360, 0, has_recent_reading],
-                        [n_periods_high_hdd_per_day, ">=", 1, 1, 0, has_enough_periods_with_high_hdd_per_day],
-                        [n_periods_low_hdd_per_day, ">=", 1, 1, 0, has_enough_periods_with_low_hdd_per_day],
-                        [cvrmse, "<=", 1, 20, 0, meets_cvrmse_limit],
-                    ],
-                    input_mapping: {
-                        time_span: {},
-                        total_hdd: {},
-                        hdd_tmy: {},
-                        n_days_since_reading: {},
-                        n_periods_high_hdd_per_day: {},
-                        n_periods_low_hdd_per_day: {},
-                        cvrmse: {},
-                    },
-                    auxiliary_outputs: {
-                        has_enough_total_cdd: true,
-                        has_enough_periods_with_high_cdd_per_day: true,
-                        has_enough_periods_with_low_cdd_per_day: true,
-                    },
-                    output_mapping: {
-                        spans_330_days: {},
-                        spans_184_days: {},
-                        has_enough_total_hdd: {},
-                        has_enough_total_cdd: {},
-                        has_recent_reading: {},
-                        has_enough_periods_with_high_hdd_per_day: {},
-                        has_enough_periods_with_low_hdd_per_day: {},
-                        has_enough_periods_with_high_cdd_per_day: {},
-                        has_enough_periods_with_low_cdd_per_day: {},
-                        meets_cvrmse_limit: {},
-                    },
-                },
-            }
-        },
-        !obj:eemeter.meter.And {
-            inputs: [
-                has_enough_total_hdd,
-                has_enough_periods_with_high_hdd_per_day,
-                has_enough_periods_with_low_hdd_per_day,
-            ],
-            input_mapping: {
-                has_enough_total_hdd: {},
-                has_enough_periods_with_high_hdd_per_day: {},
-                has_enough_periods_with_low_hdd_per_day: {},
-            },
-            output_mapping: { output: { name: has_enough_hdd, }, },
-        },
-        !obj:eemeter.meter.And {
-            inputs: [
-                has_enough_total_cdd,
-                has_enough_periods_with_high_cdd_per_day,
-                has_enough_periods_with_low_cdd_per_day,
-            ],
-            input_mapping: {
-                has_enough_total_cdd: {},
-                has_enough_periods_with_high_cdd_per_day: {},
-                has_enough_periods_with_low_cdd_per_day: {},
-            },
-            output_mapping: { output: { name: has_enough_cdd, }, },
-        },
-        !obj:eemeter.meter.And {
-            inputs: [
-                has_enough_hdd,
-                has_enough_cdd
-            ],
-            input_mapping: {
-                has_enough_hdd: {},
-                has_enough_cdd: {},
-            },
-            output_mapping: { output: { name: has_enough_hdd_cdd }, }
-        },
-        !obj:eemeter.meter.And {
-            inputs: [
-                spans_184_days,
-                has_enough_hdd_cdd
-            ],
-            input_mapping: {
-                spans_184_days: {},
-                has_enough_hdd_cdd: {},
-            },
-            output_mapping: { output: { name: spans_183_days_and_has_enough_hdd_cdd, }, }
-        },
-        !obj:eemeter.meter.Or {
-            inputs: [
-                spans_330_days,
-                spans_183_days_and_has_enough_hdd_cdd
-            ],
-            input_mapping: {
-                spans_330_days: {},
-                spans_183_days_and_has_enough_hdd_cdd: {},
-            },
-            output_mapping: { output: { name: has_enough_data } }
-        },
-        !obj:eemeter.meter.And {
-            inputs: [
-                has_recent_reading,
-                has_enough_data,
-                meets_cvrmse_limit,
-            ],
-            input_mapping: {
-                has_recent_reading: {},
-                has_enough_data: {},
-                meets_cvrmse_limit: {},
-            },
-            output_mapping: { output: { name: meets_model_calibration_utility_bill_criteria }, }
-        }
-    ]
-}
-"""
+with open('bpi2400.yaml', 'r') as f:
+    bpi_meter_yaml = f.read()
 
 
 class BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria(YamlDefinedMeter):
@@ -422,30 +94,28 @@ class BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria(YamlDefinedMeter):
     """
 
     def __init__(self, temperature_unit_str, **kwargs):
-
         if temperature_unit_str not in ["degF", "degC"]:
-            raise ValueError(
-                "Invalid temperature_unit_str: should be one of 'degF' or 'degC'.")
+            error = ("Invalid temperature_unit_str: should be one of 'degF' "
+                     "or 'degC'.")
+            raise ValueError(error)
 
         self.temperature_unit_str = temperature_unit_str
 
-        super(
-            BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria,
-            self).__init__(
-            **kwargs)
+        super(BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria,
+              self).__init__(**kwargs)
 
     def default_settings(self):
 
         def degF_to_degC(F):
             return (F - 32.) * 5. / 9.
 
-        def convert_temp_degF_to_target(temp_degF):
+        def temp_degF_to_target(temp_degF):
             if self.temperature_unit_str == "degF":
                 return temp_degF
             else:
                 return degF_to_degC(temp_degF)
 
-        def convert_slope_degF_to_target(slope_degF):
+        def slope_degF_to_target(slope_degF):
             if self.temperature_unit_str == "degF":
                 return slope_degF
             else:
@@ -456,94 +126,52 @@ class BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria(YamlDefinedMeter):
             "electricity_baseload_low": 0,
             "electricity_baseload_x0": 0,
             "electricity_baseload_high": 1000,
-            "electricity_heating_slope_low": convert_slope_degF_to_target(0),
-            "electricity_heating_slope_x0": convert_slope_degF_to_target(0),
-            "electricity_heating_slope_high": convert_slope_degF_to_target(1000),
-            "electricity_cooling_slope_low": convert_slope_degF_to_target(0),
-            "electricity_cooling_slope_x0": convert_slope_degF_to_target(0),
-            "electricity_cooling_slope_high": convert_slope_degF_to_target(1000),
+            "electricity_heating_slope_low": slope_degF_to_target(0),
+            "electricity_heating_slope_x0": slope_degF_to_target(0),
+            "electricity_heating_slope_high": slope_degF_to_target(1000),
+            "electricity_cooling_slope_low": slope_degF_to_target(0),
+            "electricity_cooling_slope_x0": slope_degF_to_target(0),
+            "electricity_cooling_slope_high": slope_degF_to_target(1000),
 
             "natural_gas_baseload_low": 0,
             "natural_gas_baseload_x0": 0,
             "natural_gas_baseload_high": 1000,
-            "natural_gas_heating_slope_low": convert_slope_degF_to_target(0),
-            "natural_gas_heating_slope_x0": convert_slope_degF_to_target(0),
-            "natural_gas_heating_slope_high": convert_slope_degF_to_target(1000),
+            "natural_gas_heating_slope_low": slope_degF_to_target(0),
+            "natural_gas_heating_slope_x0": slope_degF_to_target(0),
+            "natural_gas_heating_slope_high": slope_degF_to_target(1000),
 
-            "heating_balance_temp_low": convert_temp_degF_to_target(55),
-            "heating_balance_temp_x0": convert_temp_degF_to_target(60),
-            "heating_balance_temp_high": convert_temp_degF_to_target(70),
-            "cooling_balance_temp_low": convert_temp_degF_to_target(60),
-            "cooling_balance_temp_x0": convert_temp_degF_to_target(70),
-            "cooling_balance_temp_high": convert_temp_degF_to_target(75),
+            "heating_balance_temp_low": temp_degF_to_target(55),
+            "heating_balance_temp_x0": temp_degF_to_target(60),
+            "heating_balance_temp_high": temp_degF_to_target(70),
+            "cooling_balance_temp_low": temp_degF_to_target(60),
+            "cooling_balance_temp_x0": temp_degF_to_target(70),
+            "cooling_balance_temp_high": temp_degF_to_target(75),
 
-            "hdd_base": convert_temp_degF_to_target(65),
-            "cdd_base": convert_temp_degF_to_target(65),
+            "hdd_base": temp_degF_to_target(65),
+            "cdd_base": temp_degF_to_target(65),
         }
         return settings
 
     def validate_settings(self, settings):
+        groups = (('electricity_baseload', 'Electricity baseload'),
+                  ('electricity_heating_slope', 'Electricity heating slope'),
+                  ('electricity_cooling_slope', 'Electricity cooling slope'),
+                  ('natural_gas_baseload', 'Natural gas baseload'),
+                  ('natural_gas_heating_slope', 'Electricity heating slope'),
+                  ('heating_balance_temp', 'Heating balance temperature'),
+                  ('cooling_balance_temp', 'Cooling balance temperature'))
 
-        if not 0 <= settings["electricity_baseload_low"] <= settings[
-                "electricity_baseload_x0"] <= settings["electricity_baseload_high"]:
-            message = "Electricity baseload parameter limits must be such " \
-                "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
-                "high={}".format(settings["electricity_baseload_low"],
-                                 settings["electricity_baseload_x0"],
-                                 settings["electricity_baseload_high"])
-            raise ValueError(message)
-        if not 0 <= settings["electricity_heating_slope_low"] <= settings[
-                "electricity_heating_slope_x0"] <= settings["electricity_heating_slope_high"]:
-            message = "Electricity heating slope parameter limits must be such " \
-                "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
-                "high={}".format(settings["electricity_heating_slope_low"],
-                                 settings["electricity_heating_slope_x0"],
-                                 settings["electricity_heating_slope_high"])
-            raise ValueError(message)
-        if not 0 <= settings["electricity_cooling_slope_low"] <= settings[
-                "electricity_cooling_slope_x0"] <= settings["electricity_cooling_slope_high"]:
-            message = "Electricity cooling slope parameter limits must be such " \
-                "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
-                "high={}".format(settings["electricity_cooling_slope_low"],
-                                 settings["electricity_cooling_slope_x0"],
-                                 settings["electricity_cooling_slope_high"])
-            raise ValueError(message)
+        for partial_key, parameter_type in groups:
+            low = settings['{}_low'.format(partial_key)]
+            high = settings['{}_high'.format(partial_key)]
+            x0 = settings['{}_x0'.format(partial_key)]
 
-        if not 0 <= settings["natural_gas_baseload_low"] <= settings[
-                "natural_gas_baseload_x0"] <= settings["natural_gas_baseload_high"]:
-            message = "Natural gas baseload parameter limits must be such " \
-                "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
-                "high={}".format(settings["natural_gas_baseload_low"],
-                                 settings["natural_gas_baseload_x0"],
-                                 settings["natural_gas_baseload_high"])
-            raise ValueError(message)
-        if not 0 <= settings["natural_gas_heating_slope_low"] <= settings[
-                "natural_gas_heating_slope_x0"] <= settings["natural_gas_heating_slope_high"]:
-            message = "Natural gas heating slope parameter limits must be such " \
-                "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
-                "high={}".format(settings["natural_gas_heating_slope_low"],
-                                 settings["natural_gas_heating_slope_x0"],
-                                 settings["natural_gas_heating_slope_high"])
-            raise ValueError(message)
+            if not 0 <= low <= x0 <= high:
+                error = ("{} parameter limits must be such "
+                         "that 0 <= low <= x0 <= high, "
+                         "but found low={}, x0={}, high={}")
 
-        if not settings["heating_balance_temp_low"] <= settings[
-                "heating_balance_temp_x0"] <= settings["heating_balance_temp_high"]:
-            raise ValueError(
-                "Heating balance temperature parameter limits must be such that low <= x0 <= high")
-            message = "Heating balance temperature parameter limits must be such " \
-                "that low <= x0 <= high, but found low={}, x0={}, " \
-                "high={}".format(settings["heating_balance_temp_low"],
-                                 settings["heating_balance_temp_x0"],
-                                 settings["heating_balance_temp_high"])
-            raise ValueError(message)
-        if not settings["cooling_balance_temp_low"] <= settings[
-                "cooling_balance_temp_x0"] <= settings["cooling_balance_temp_high"]:
-            message = "Cooling balance temperature parameter limits must be such " \
-                "that low <= x0 <= high, but found low={}, x0={}, " \
-                "high={}".format(settings["cooling_balance_temp_low"],
-                                 settings["cooling_balance_temp_x0"],
-                                 settings["cooling_balance_temp_high"])
-            raise ValueError(message)
+                raise ValueError(error.format(parameter_type, low, x0, high))
 
     @property
     def yaml(self):
@@ -561,7 +189,8 @@ class BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria(YamlDefinedMeter):
         weather_source : eemeter.weather.WeatherSourceBase
             Weather data should come from a source as geographically and
             climatically similar to the target project as possible.
-        weather_normal_source : eemeter.weather.WeatherSourceBase with eemeter.weather.WeatherNormalMixin
+        weather_normal_source : eemeter.weather.WeatherSourceBase with
+            eemeter.weather.WeatherNormalMixin
             Weather normal data should come from a source as geographically and
             climatically similar to the target project as possible.
         since_date : datetime.datetime, optional
@@ -574,10 +203,10 @@ class BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria(YamlDefinedMeter):
 
             - *"average_daily_usages_bpi2400"* : Average usage per
               day (kWh/day) for the consumption periods.
-            - *"cdd_tmy"* : Total cooling degree days (base 65 degF or 18.33 degC)
-              in a typical meteorological year (TMY3).
-            - *"consumption_history_no_estimated"* : The input consumption history
-              with estimated periods consolidated or removed.
+            - *"cdd_tmy"* : Total cooling degree days (base 65 degF or
+              18.33 degC) in a typical meteorological year (TMY3).
+            - *"consumption_history_no_estimated"* : The input consumption
+              history with estimated periods consolidated or removed.
             - *"cvrmse"* : The Coefficient of Variation of
               Root-mean-squared Error on the outputs of the usage model.
             - *"estimated_average_daily_usages"* : Average usage per day for
@@ -631,8 +260,8 @@ class BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria(YamlDefinedMeter):
             - *"has_recent_reading"* : A boolean indicating whether or
               not there is valid (not missing) consumption data within 365 days
               of the last date in the consumption data.
-            - *"hdd_tmy"* : Total heating degree days (base 65 degF or 18.33 degC)
-              in a typical meteorological year (TMY3).
+            - *"hdd_tmy"* : Total heating degree days (base 65 degF or
+              18.33 degC) in a typical meteorological year (TMY3).
             - *"meets_cvrmse_limit"* : A boolean indicating whether or
               not the Coefficient of Variation of the Root-mean-square Error
               (CVRMSE) of a regression of consumption data against
@@ -671,11 +300,14 @@ class BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria(YamlDefinedMeter):
               array of values with the following order:
 
               For electricty: [base_daily_consumption (kWh/day),
-              heating_balance_temperature (degF or degC), heating_slope (kWh/HDD),
-              cooling_balance_temperature (degF or degC), cooling_slope (kWh/CDD)].
+              heating_balance_temperature (degF or degC),
+              heating_slope (kWh/HDD),
+              cooling_balance_temperature (degF or degC),
+              cooling_slope (kWh/CDD)].
 
               For natural_gas: [base_daily_consumption (kWh/day),
-              heating_balance_temperature (degF or degC), heating_slope (kWh/HDD)].
+              heating_balance_temperature (degF or degC),
+              heating_slope (kWh/HDD)].
 
             - *"time_span"* : Number of days between earliest available
               data and latest available data.

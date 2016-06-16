@@ -1,5 +1,7 @@
 import pytest
 
+from eemeter.config.yaml_parser import load
+
 
 def pytest_addoption(parser):
     parser.addoption("--runslow", action="store_true", help="run slow tests")
@@ -21,6 +23,15 @@ def fixture_file():
     def loader(filename):
         with open('tests/fixture_files/' + filename, 'r') as f:
             return f.read()
+
+    return loader
+
+
+@pytest.fixture
+def yaml_fixture_file():
+    def loader(filename):
+        with open('tests/fixture_files/' + filename, 'r') as f:
+            return load(f.read())
 
     return loader
 

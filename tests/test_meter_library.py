@@ -6,7 +6,6 @@ import pytz
 
 from numpy.testing import assert_allclose
 
-from eemeter.config.yaml_parser import load
 from eemeter.consumption import ConsumptionData
 from eemeter.evaluation import Period
 from eemeter.location import Location
@@ -29,43 +28,10 @@ ATOL = 1e-2
 
 @pytest.mark.slow
 def test_temperature_sensitivity_parameter_optimization(
-        generated_consumption_data_1, gsod_722880_2012_2014_weather_source):
+        yaml_fixture_file, generated_consumption_data_1,
+        gsod_722880_2012_2014_weather_source):
 
-    meter_yaml = """
-        !obj:eemeter.meter.TemperatureSensitivityParameterOptimizationMeter {
-            temperature_unit_str: "degF",
-            model: !obj:eemeter.models.AverageDailyTemperatureSensitivityModel {
-                cooling: True,
-                heating: True,
-                initial_params: {
-                    base_daily_consumption: 0,
-                    heating_slope: 0,
-                    cooling_slope: 0,
-                    heating_balance_temperature: 60,
-                    cooling_balance_temperature: 70,
-                },
-                param_bounds: {
-                    base_daily_consumption: [0,2000],
-                    heating_slope: [0,200],
-                    cooling_slope: [0,200],
-                    heating_balance_temperature: [55,65],
-                    cooling_balance_temperature: [65,75],
-                },
-            },
-            input_mapping: {
-                "consumption_data": {},
-                "weather_source": {},
-                "energy_unit_str": {},
-            },
-            output_mapping: {
-                "temp_sensitivity_params": {},
-                "n_days": {},
-                "average_daily_usages": {},
-                "estimated_average_daily_usages": {},
-            },
-        }
-        """
-    meter = load(meter_yaml)
+    meter = yaml_fixture_file('meter/temp_sensitivity_optimization.yaml')
 
     cd, params = generated_consumption_data_1
 
@@ -88,56 +54,10 @@ def test_temperature_sensitivity_parameter_optimization(
 
 @pytest.mark.slow
 def test_annualized_usage_meter(
-        generated_consumption_data_with_annualized_usage_1,
+        yaml_fixture_file, generated_consumption_data_with_annualized_usage_1,
         gsod_722880_2012_2014_weather_source, tmy3_722880_weather_source):
 
-    meter_yaml = """
-        !obj:eemeter.meter.Sequence {
-            sequence: [
-                !obj:eemeter.meter.TemperatureSensitivityParameterOptimizationMeter {
-                    temperature_unit_str: "degF",
-                    model: !obj:eemeter.models.AverageDailyTemperatureSensitivityModel &model {
-                        cooling: True,
-                        heating: True,
-                        initial_params: {
-                            base_daily_consumption: 0,
-                            heating_slope: 0,
-                            cooling_slope: 0,
-                            heating_balance_temperature: 60,
-                            cooling_balance_temperature: 70,
-                        },
-                        param_bounds: {
-                            base_daily_consumption: [0,2000],
-                            heating_slope: [0,200],
-                            cooling_slope: [0,200],
-                            heating_balance_temperature: [55,65],
-                            cooling_balance_temperature: [65,75],
-                        },
-                    },
-                    input_mapping: {
-                        consumption_data: {},
-                        weather_source: {},
-                        energy_unit_str: {},
-                    },
-                    output_mapping: {
-                        temp_sensitivity_params: {name: model_params},
-                    },
-                },
-                !obj:eemeter.meter.AnnualizedUsageMeter {
-                    temperature_unit_str: "degF",
-                    model: *model,
-                    input_mapping: {
-                        model_params: {},
-                        weather_normal_source: {},
-                    },
-                    output_mapping: {
-                        annualized_usage: {},
-                    },
-                }
-            ]
-        }
-        """
-    meter = load(meter_yaml)
+    meter = yaml_fixture_file('meter/annualized_usage.yaml')
 
     cd, params, annualized_usage = \
         generated_consumption_data_with_annualized_usage_1
@@ -339,19 +259,10 @@ def test_average_daily_usage(generated_consumption_data_1):
 
 
 def test_estimated_average_daily_usage(
-        generated_consumption_data_1,
+        yaml_fixture_file, generated_consumption_data_1,
         gsod_722880_2012_2014_weather_source):
-    meter_yaml = """
-        !obj:eemeter.meter.EstimatedAverageDailyUsage {
-            temperature_unit_str: "degF",
-            model: !obj:eemeter.models.AverageDailyTemperatureSensitivityModel {
-                cooling: True,
-                heating: True,
-            },
-        }
-        """
-    meter = load(meter_yaml)
 
+    meter = yaml_fixture_file('meter/estimated_daily_usage.yaml')
     cd, params = generated_consumption_data_1
 
     result = meter.evaluate_raw(
@@ -456,5 +367,3 @@ def test_project_consumption_baseline_reporting(generated_consumption_data_1):
         18] == datetime(2014, 12, 16, tzinfo=pytz.UTC)
     assert result["consumption"][1]["tags"][0] == "electricity"
     assert result["consumption"][1]["tags"][1] == "reporting"
-
-

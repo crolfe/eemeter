@@ -206,7 +206,8 @@ class AnnualizedGrossSavingsMeter(MeterBase):
             Consumption data over which annualized gross savings will be
             estimated. (Note: only used for finding appropriate number of days
             multiplier).
-        weather_normal_source : eemeter.weather.WeatherBase and eemeter.weather.WeatherNormalMixin
+        weather_normal_source : eemeter.weather.WeatherBase and
+            eemeter.weather.WeatherNormalMixin
             Weather normal data source. Should be from a location (station) as
             geographically and climatically similar to project as possible.
 
@@ -357,7 +358,8 @@ class NormalAnnualHDD(MeterBase):
 
         Parameters
         ----------
-        weather_normal_source : eemeter.weather.WeatherSourceBase and eemeter.weather.WeatherNormalMixin
+        weather_normal_source : eemeter.weather.WeatherSourceBase and
+            eemeter.weather.WeatherNormalMixin
             A weather data source from a location as geographically and
             climatically close as possible to the target project.
 
@@ -395,7 +397,8 @@ class NormalAnnualCDD(MeterBase):
 
         Parameters
         ----------
-        weather_normal_source : eemeter.weather.WeatherSourceBase and eemeter.weather.WeatherNormalMixin
+        weather_normal_source : eemeter.weather.WeatherSourceBase and
+            eemeter.weather.WeatherNormalMixin
             A weather data source from a location as geographically and
             climatically close as possible to the target project.
 

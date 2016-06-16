@@ -186,8 +186,8 @@ class TMY3Client(object):
         if station is None:
             return None
 
-        url = "http://rredc.nrel.gov/solar/old_data/nsrdb/1991-2005/data/tmy3/{}TYA.CSV".format(
-            station)
+        url = ("http://rredc.nrel.gov/solar/old_data/nsrdb/"
+               "1991-2005/data/tmy3/{}TYA.CSV").format(station)
         r = requests.get(url)
 
         if r.status_code == 200:

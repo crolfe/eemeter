@@ -196,9 +196,11 @@ class ProjectGenerator:
             reporting_annualized_usage
 
         baseline_generator = MonthlyBillingConsumptionGenerator(
-            fuel_type, consumption_unit_name, temperature_unit_name, model, baseline_params)
+            fuel_type, consumption_unit_name, temperature_unit_name,
+            model, baseline_params)
         reporting_generator = MonthlyBillingConsumptionGenerator(
-            fuel_type, consumption_unit_name, temperature_unit_name, model, reporting_params)
+            fuel_type, consumption_unit_name, temperature_unit_name, model,
+            reporting_params)
 
         datetimes = generate_monthly_billing_datetimes(period, dist=None)
 

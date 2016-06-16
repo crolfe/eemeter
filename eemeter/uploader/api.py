@@ -516,14 +516,15 @@ def _process_raw_consumption_records_data(records):
     # and don't actually affect the processing. This an indication that (TODO),
     # this logic should be factored out of the ConsumptionData object.
     fuel_type, unit_name = "electricity", "kWh"
-    consumption_data = ConsumptionData(records, fuel_type, unit_name,
-                                       record_type="arbitrary")
+    cd = ConsumptionData(records, fuel_type, unit_name,
+                         record_type="arbitrary")
 
     consumption_records_data = []
-    for (d1, value), (d2, estimated) in zip(
-            consumption_data.data.iteritems(), consumption_data.estimated.iteritems()):
+    for (d1, value), (d2, estimated) in zip(cd.data.iteritems(),
+                                            cd.estimated.iteritems()):
         assert d1 == d2
-        record = {"start": pytz.UTC.localize(d1.to_datetime()).strftime(
-            "%Y-%m-%dT%H:%M:%S%z"), "value": value, "estimated": bool(estimated), }
+        fmt = "%Y-%m-%dT%H:%M:%S%z"
+        record = {"start": pytz.UTC.localize(d1.to_datetime()).strftime(fmt),
+                  "value": value, "estimated": bool(estimated)}
         consumption_records_data.append(record)
     return consumption_records_data

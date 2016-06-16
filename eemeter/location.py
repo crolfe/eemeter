@@ -130,7 +130,8 @@ def lat_lng_to_station(lat, lng):
     Returns
     -------
     station : str, None
-        String representing a USAF weather station ID or None, if none was found.
+        String representing a USAF weather station ID or None, if none was
+        found.
     """
     if lat is None or lng is None:
         return None

@@ -1,248 +1,13 @@
 from eemeter.meter.base import YamlDefinedMeter
 
-default_residential_meter_yaml = """
-!obj:eemeter.meter.Sequence {
-    sequence: [
-        !obj:eemeter.meter.ProjectAttributes {
-            input_mapping: { project: {} },
-            output_mapping: {
-                weather_source: {},
-                weather_normal_source: {},
-            },
-        },
-        !obj:eemeter.meter.ProjectConsumptionDataBaselineReporting {
-            input_mapping: { project: {} },
-            output_mapping: { consumption: {}, },
-        },
-        !obj:eemeter.meter.For {
-            variable: { name: consumption_data_raw },
-            iterable: { name: consumption },
-            meter: !obj:eemeter.meter.Sequence {
-                sequence: [
-                    !obj:eemeter.meter.DownsampleConsumption {
-                        freq: 'D',
-                        input_mapping: { consumption_data: {name: consumption_data_raw} },
-                        output_mapping: { consumption_downsampled: {name: consumption_data}, },
-                    },
-                    !obj:eemeter.meter.BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria {
-                        temperature_unit_str: !setting temperature_unit_str,
-                        settings: {
-                            temperature_unit_str: !setting temperature_unit_str,
-                            electricity_baseload_low: !setting electricity_baseload_low,
-                            electricity_baseload_x0: !setting electricity_baseload_x0,
-                            electricity_baseload_high: !setting electricity_baseload_high,
-                            electricity_heating_slope_low: !setting electricity_heating_slope_low,
-                            electricity_heating_slope_x0: !setting electricity_heating_slope_x0,
-                            electricity_heating_slope_high: !setting electricity_heating_slope_high,
-                            electricity_cooling_slope_low: !setting electricity_cooling_slope_low,
-                            electricity_cooling_slope_x0: !setting electricity_cooling_slope_x0,
-                            electricity_cooling_slope_high: !setting electricity_cooling_slope_high,
-                            natural_gas_baseload_low: !setting natural_gas_baseload_low,
-                            natural_gas_baseload_x0: !setting natural_gas_baseload_x0,
-                            natural_gas_baseload_high: !setting natural_gas_baseload_high,
-                            natural_gas_heating_slope_low: !setting natural_gas_heating_slope_low,
-                            natural_gas_heating_slope_x0: !setting natural_gas_heating_slope_x0,
-                            natural_gas_heating_slope_high: !setting natural_gas_heating_slope_high,
-                            heating_balance_temp_low: !setting heating_balance_temp_low,
-                            heating_balance_temp_x0: !setting heating_balance_temp_x0,
-                            heating_balance_temp_high: !setting heating_balance_temp_high,
-                            cooling_balance_temp_low: !setting cooling_balance_temp_low,
-                            cooling_balance_temp_x0: !setting cooling_balance_temp_x0,
-                            cooling_balance_temp_high: !setting cooling_balance_temp_high,
-                            hdd_base: !setting hdd_base,
-                            cdd_base: !setting cdd_base,
-                        },
-                        tagspace: ["bpi2400"],
-                    },
-                    !obj:eemeter.meter.Sequence {
-                        sequence: [
-                            !obj:eemeter.meter.Switch {
-                                target: {
-                                    name: fuel_type,
-                                    tags: ["bpi2400"]
-                                },
-                                cases: {
-                                    electricity: !obj:eemeter.meter.Sequence {
-                                        sequence: [
-                                            !obj:eemeter.meter.TemperatureSensitivityParameterOptimizationMeter {
-                                                temperature_unit_str: !setting temperature_unit_str,
-                                                model: !obj:eemeter.models.AverageDailyTemperatureSensitivityModel &electricity_model {
-                                                    cooling: True,
-                                                    heating: True,
-                                                    initial_params: {
-                                                        base_daily_consumption: !setting electricity_baseload_x0,
-                                                        heating_slope: !setting electricity_heating_slope_x0,
-                                                        cooling_slope: !setting electricity_cooling_slope_x0,
-                                                        heating_balance_temperature: !setting heating_balance_temp_x0,
-                                                        cooling_balance_temperature: !setting cooling_balance_temp_x0,
-                                                    },
-                                                    param_bounds: {
-                                                        base_daily_consumption: [!setting electricity_baseload_low, !setting electricity_baseload_high],
-                                                        heating_slope: [!setting electricity_heating_slope_low, !setting electricity_heating_slope_high],
-                                                        cooling_slope: [!setting electricity_heating_slope_low, !setting electricity_cooling_slope_high],
-                                                        heating_balance_temperature: [!setting heating_balance_temp_low, !setting heating_balance_temp_high],
-                                                        cooling_balance_temperature: [!setting cooling_balance_temp_low, !setting cooling_balance_temp_high],
-                                                    },
-                                                },
-                                                input_mapping: {
-                                                    consumption_data: {},
-                                                    weather_source: {},
-                                                    energy_unit_str: {},
-                                                },
-                                                output_mapping: {
-                                                    temp_sensitivity_params: { name: model_params },
-                                                    average_daily_usages: {},
-                                                    estimated_average_daily_usages: {},
-                                                },
-                                            },
-                                            !obj:eemeter.meter.AnnualizedUsageMeter {
-                                                temperature_unit_str: !setting temperature_unit_str,
-                                                model: *electricity_model,
-                                                input_mapping: {
-                                                    model_params: {},
-                                                    weather_normal_source: {},
-                                                },
-                                                output_mapping: {
-                                                    annualized_usage: {},
-                                                },
-                                            },
-                                        ]
-                                    },
-                                    natural_gas: !obj:eemeter.meter.Sequence {
-                                        sequence: [
-                                            !obj:eemeter.meter.TemperatureSensitivityParameterOptimizationMeter {
-                                                temperature_unit_str: !setting temperature_unit_str,
-                                                model: !obj:eemeter.models.AverageDailyTemperatureSensitivityModel &natural_gas_model {
-                                                    cooling: False,
-                                                    heating: True,
-                                                    initial_params: {
-                                                        base_daily_consumption: !setting natural_gas_baseload_x0,
-                                                        heating_slope: !setting natural_gas_heating_slope_x0,
-                                                        heating_balance_temperature: !setting heating_balance_temp_x0,
-                                                    },
-                                                    param_bounds: {
-                                                        base_daily_consumption: [!setting natural_gas_baseload_low, !setting natural_gas_baseload_high],
-                                                        heating_slope: [!setting natural_gas_heating_slope_low, !setting natural_gas_heating_slope_high],
-                                                        heating_balance_temperature: [!setting heating_balance_temp_low, !setting heating_balance_temp_high],
-                                                    },
-                                                },
-                                                input_mapping: {
-                                                    consumption_data: {},
-                                                    weather_source: {},
-                                                    energy_unit_str: {},
-                                                },
-                                                output_mapping: {
-                                                    temp_sensitivity_params: { name: model_params },
-                                                    average_daily_usages: {},
-                                                    estimated_average_daily_usages: {},
-                                                },
-                                            },
-                                            !obj:eemeter.meter.AnnualizedUsageMeter {
-                                                temperature_unit_str: !setting temperature_unit_str,
-                                                model: *natural_gas_model,
-                                                input_mapping: {
-                                                    model_params: {},
-                                                    weather_normal_source: {},
-                                                },
-                                                output_mapping: {
-                                                    annualized_usage: {},
-                                                },
-                                            },
-                                        ]
-                                    },
-                                },
-                            },
-                            !obj:eemeter.meter.RMSE {
-                                input_mapping: {
-                                    y: { name: average_daily_usages },
-                                    y_hat: { name: estimated_average_daily_usages },
-                                },
-                                output_mapping: {
-                                    rmse: {},
-                                }
-                            },
-                            !obj:eemeter.meter.RSquared {
-                                input_mapping: {
-                                    y: { name: average_daily_usages },
-                                    y_hat: { name: estimated_average_daily_usages },
-                                },
-                                output_mapping: {
-                                    r_squared: {},
-                                }
-                            },
-                        ],
-                    },
-                ]
-            },
-        },
-        !obj:eemeter.meter.ProjectFuelTypes {
-            input_mapping: { project: {} },
-            output_mapping: { fuel_types: {} },
-        },
-        !obj:eemeter.meter.For {
-            variable: { name: active_fuel_type },
-            iterable: { name: fuel_types },
-            meter: !obj:eemeter.meter.FuelTypeTagFilter {
-                fuel_type_search_name: active_fuel_type,
-                input_mapping: {
-                    weather_source: {},
-                    active_fuel_type: {},
-                },
-                meter: !obj:eemeter.meter.Switch {
-                    target: {
-                        name: active_fuel_type,
-                        tags: [],
-                    },
-                    cases: {
-                        electricity: !obj:eemeter.meter.GrossSavingsMeter {
-                            temperature_unit_str: !setting temperature_unit_str,
-                            model: *electricity_model,
-                            input_mapping: {
-                                model_params_baseline: {
-                                    name: model_params,
-                                    tags: [ baseline ]
-                                },
-                                consumption_data_reporting : {
-                                    name: consumption_data_no_estimated,
-                                    tags: [ reporting ]
-                                },
-                                weather_source: {},
-                                energy_unit_str : { tags: [ baseline ] },
-                            },
-                            output_mapping: {
-                                gross_savings: {},
-                            },
-                        },
-                        natural_gas: !obj:eemeter.meter.GrossSavingsMeter {
-                            temperature_unit_str: !setting temperature_unit_str,
-                            model: *natural_gas_model,
-                            input_mapping: {
-                                model_params_baseline: {
-                                    name: model_params,
-                                    tags: [ baseline ]
-                                },
-                                consumption_data_reporting : {
-                                    name: consumption_data_no_estimated,
-                                    tags: [ reporting ]
-                                },
-                                weather_source: {},
-                                energy_unit_str : { tags: [ baseline ] },
-                            },
-                            output_mapping: {
-                                gross_savings: {},
-                            },
-                        },
-                    },
-                },
-            },
-        },
-    ]
-}"""
+
+with open('default_residential_meter.yaml', 'r') as f:
+    default_residential_meter_yaml = f.read()
 
 
 class DefaultResidentialMeter(YamlDefinedMeter):
     """Implementation of the core EE-Meter savings evaluation method with
-    defualt settings for evaluation of residential energy efficiency projects.
+    default settings for evaluation of residential energy efficiency projects.
 
     Parameters
     ----------
@@ -325,8 +90,9 @@ class DefaultResidentialMeter(YamlDefinedMeter):
     def __init__(self, temperature_unit_str="degC", **kwargs):
 
         if temperature_unit_str not in ["degF", "degC"]:
-            raise ValueError(
-                "Invalid temperature_unit_str: should be one of 'degF' or 'degC'.")
+            error = ("Invalid temperature_unit_str: should be "
+                     "one of 'degF' or 'degC'.")
+            raise ValueError(error)
 
         self.temperature_unit_str = temperature_unit_str
 
@@ -337,13 +103,13 @@ class DefaultResidentialMeter(YamlDefinedMeter):
         def degF_to_degC(F):
             return (F - 32.) * 5. / 9.
 
-        def convert_temp_degF_to_target(temp_degF):
+        def temp_degF_to_target(temp_degF):
             if self.temperature_unit_str == "degF":
                 return temp_degF
             else:
                 return degF_to_degC(temp_degF)
 
-        def convert_slope_degF_to_target(slope_degF):
+        def slope_degF_to_target(slope_degF):
             if self.temperature_unit_str == "degF":
                 return slope_degF
             else:
@@ -354,97 +120,56 @@ class DefaultResidentialMeter(YamlDefinedMeter):
             "electricity_baseload_low": 0,
             "electricity_baseload_x0": 0,
             "electricity_baseload_high": 1000,
-            "electricity_heating_slope_low": convert_slope_degF_to_target(0),
-            "electricity_heating_slope_x0": convert_slope_degF_to_target(0),
-            "electricity_heating_slope_high": convert_slope_degF_to_target(1000),
-            "electricity_cooling_slope_low": convert_slope_degF_to_target(0),
-            "electricity_cooling_slope_x0": convert_slope_degF_to_target(0),
-            "electricity_cooling_slope_high": convert_slope_degF_to_target(1000),
+            "electricity_heating_slope_low": slope_degF_to_target(0),
+            "electricity_heating_slope_x0": slope_degF_to_target(0),
+            "electricity_heating_slope_high": slope_degF_to_target(1000),
+            "electricity_cooling_slope_low": slope_degF_to_target(0),
+            "electricity_cooling_slope_x0": slope_degF_to_target(0),
+            "electricity_cooling_slope_high": slope_degF_to_target(1000),
 
             "natural_gas_baseload_low": 0,
             "natural_gas_baseload_x0": 0,
             "natural_gas_baseload_high": 1000,
-            "natural_gas_heating_slope_low": convert_slope_degF_to_target(0),
-            "natural_gas_heating_slope_x0": convert_slope_degF_to_target(0),
-            "natural_gas_heating_slope_high": convert_slope_degF_to_target(1000),
+            "natural_gas_heating_slope_low": slope_degF_to_target(0),
+            "natural_gas_heating_slope_x0": slope_degF_to_target(0),
+            "natural_gas_heating_slope_high": slope_degF_to_target(1000),
 
-            "heating_balance_temp_low": convert_temp_degF_to_target(55),
-            "heating_balance_temp_x0": convert_temp_degF_to_target(60),
-            "heating_balance_temp_high": convert_temp_degF_to_target(70),
-            "cooling_balance_temp_low": convert_temp_degF_to_target(60),
-            "cooling_balance_temp_x0": convert_temp_degF_to_target(70),
-            "cooling_balance_temp_high": convert_temp_degF_to_target(75),
+            "heating_balance_temp_low": temp_degF_to_target(55),
+            "heating_balance_temp_x0": temp_degF_to_target(60),
+            "heating_balance_temp_high": temp_degF_to_target(70),
+            "cooling_balance_temp_low": temp_degF_to_target(60),
+            "cooling_balance_temp_x0": temp_degF_to_target(70),
+            "cooling_balance_temp_high": temp_degF_to_target(75),
 
-            "hdd_base": convert_temp_degF_to_target(65),
-            "cdd_base": convert_temp_degF_to_target(65),
+            "hdd_base": temp_degF_to_target(65),
+            "cdd_base": temp_degF_to_target(65),
         }
         return settings
 
     def validate_settings(self, settings):
+        groups = (('electricity_baseload', 'Electricity baseload'),
+                  ('electricity_heating_slope', 'Electricity heating slope'),
+                  ('electricity_cooling_slope', 'Electricity cooling slope'),
+                  ('natural_gas_baseload', 'Natural gas baseload'),
+                  ('natural_gas_heating_slope', 'Electricity heating slope'),
+                  ('heating_balance_temp', 'Heating balance temperature'),
+                  ('cooling_balance_temp', 'Cooling balance temperature'))
 
-        if not 0 <= settings["electricity_baseload_low"] <= settings[
-                "electricity_baseload_x0"] <= settings["electricity_baseload_high"]:
-            message = "Electricity baseload parameter limits must be such " \
-                "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
-                "high={}".format(settings["electricity_baseload_low"],
-                                 settings["electricity_baseload_x0"],
-                                 settings["electricity_baseload_high"])
-            raise ValueError(message)
-        if not 0 <= settings["electricity_heating_slope_low"] <= settings[
-                "electricity_heating_slope_x0"] <= settings["electricity_heating_slope_high"]:
-            message = "Electricity heating slope parameter limits must be such " \
-                "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
-                "high={}".format(settings["electricity_heating_slope_low"],
-                                 settings["electricity_heating_slope_x0"],
-                                 settings["electricity_heating_slope_high"])
-            raise ValueError(message)
-        if not 0 <= settings["electricity_cooling_slope_low"] <= settings[
-                "electricity_cooling_slope_x0"] <= settings["electricity_cooling_slope_high"]:
-            message = "Electricity cooling slope parameter limits must be such " \
-                "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
-                "high={}".format(settings["electricity_cooling_slope_low"],
-                                 settings["electricity_cooling_slope_x0"],
-                                 settings["electricity_cooling_slope_high"])
-            raise ValueError(message)
+        for partial_key, parameter_type in groups:
+            low = settings['{}_low'.format(partial_key)]
+            high = settings['{}_high'.format(partial_key)]
+            x0 = settings['{}_x0'.format(partial_key)]
 
-        if not 0 <= settings["natural_gas_baseload_low"] <= settings[
-                "natural_gas_baseload_x0"] <= settings["natural_gas_baseload_high"]:
-            message = "Natural gas baseload parameter limits must be such " \
-                "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
-                "high={}".format(settings["natural_gas_baseload_low"],
-                                 settings["natural_gas_baseload_x0"],
-                                 settings["natural_gas_baseload_high"])
-            raise ValueError(message)
-        if not 0 <= settings["natural_gas_heating_slope_low"] <= settings[
-                "natural_gas_heating_slope_x0"] <= settings["natural_gas_heating_slope_high"]:
-            message = "Natural gas heating slope parameter limits must be such " \
-                "that 0 <= low <= x0 <= high, but found low={}, x0={}, " \
-                "high={}".format(settings["natural_gas_heating_slope_low"],
-                                 settings["natural_gas_heating_slope_x0"],
-                                 settings["natural_gas_heating_slope_high"])
-            raise ValueError(message)
+            if not 0 <= low <= x0 <= high:
+                error = ("{} parameter limits must be such "
+                         "that 0 <= low <= x0 <= high, "
+                         "but found low={}, x0={}, high={}")
 
-        if not settings["heating_balance_temp_low"] <= settings[
-                "heating_balance_temp_x0"] <= settings["heating_balance_temp_high"]:
-            raise ValueError(
-                "Heating balance temperature parameter limits must be such that low <= x0 <= high")
-            message = "Heating balance temperature parameter limits must be such " \
-                "that low <= x0 <= high, but found low={}, x0={}, " \
-                "high={}".format(settings["heating_balance_temp_low"],
-                                 settings["heating_balance_temp_x0"],
-                                 settings["heating_balance_temp_high"])
-            raise ValueError(message)
-        if not settings["cooling_balance_temp_low"] <= settings[
-                "cooling_balance_temp_x0"] <= settings["cooling_balance_temp_high"]:
-            message = "Cooling balance temperature parameter limits must be such " \
-                "that low <= x0 <= high, but found low={}, x0={}, " \
-                "high={}".format(settings["cooling_balance_temp_low"],
-                                 settings["cooling_balance_temp_x0"],
-                                 settings["cooling_balance_temp_high"])
-            raise ValueError(message)
+                raise ValueError(error.format(parameter_type, low, x0, high))
 
     @property
     def yaml(self):
+
         return default_residential_meter_yaml
 
     def evaluate(self, data_collection):
@@ -472,10 +197,10 @@ class DefaultResidentialMeter(YamlDefinedMeter):
 
             - *"average_daily_usages"* : Average usage per
               day (kWh/day) for the consumption periods.
-            - *"cdd_tmy"* : Total cooling degree days (base 65 degF or 18.33 degC)
-              in a typical meteorological year (TMY3).
-            - *"consumption_history_no_estimated"* : The input consumption history
-              with estimated periods consolidated or removed.
+            - *"cdd_tmy"* : Total cooling degree days (base 65 degF or
+              18.33 degC) in a typical meteorological year (TMY3).
+            - *"consumption_history_no_estimated"* : The input consumption
+              history with estimated periods consolidated or removed.
             - *"cvrmse"* : The Coefficient of Variation of
               Root-mean-squared Error on the outputs of the usage model.
             - *"estimated_average_daily_usages"* : Average usage per day for
@@ -529,8 +254,8 @@ class DefaultResidentialMeter(YamlDefinedMeter):
             - *"has_recent_reading"* : A boolean indicating whether or
               not there is valid (not missing) consumption data within 365 days
               of the last date in the consumption data.
-            - *"hdd_tmy"* : Total heating degree days (base 65 degF or 18.33 degC)
-              in a typical meteorological year (TMY3).
+            - *"hdd_tmy"* : Total heating degree days (base 65 degF or 18.33
+              degC) in a typical meteorological year (TMY3).
             - *"meets_cvrmse_limit"* : A boolean indicating whether or
               not the Coefficient of Variation of the Root-mean-square Error
               (CVRMSE) of a regression of consumption data against
@@ -569,11 +294,13 @@ class DefaultResidentialMeter(YamlDefinedMeter):
               array of values with the following order:
 
               For electricty: [base_daily_consumption (kWh/day),
-              heating_balance_temperature (degF or degC), heating_slope (kWh/HDD),
-              cooling_balance_temperature (degF or degC), cooling_slope (kWh/CDD)].
+              heating_balance_temperature (degF or degC), heating_slope
+              (kWh/HDD), cooling_balance_temperature (degF or degC),
+              cooling_slope (kWh/CDD)].
 
               For natural_gas: [base_daily_consumption (kWh/day),
-              heating_balance_temperature (degF or degC), heating_slope (kWh/HDD)].
+              heating_balance_temperature (degF or degC), heating_slope
+              (kWh/HDD)].
 
             - *"time_span"* : Number of days between earliest available
               data and latest available data.
@@ -606,11 +333,14 @@ class DefaultResidentialMeter(YamlDefinedMeter):
               array of values with the following order:
 
               For electricty: [base_daily_consumption (kWh/day),
-              heating_balance_temperature (degF or degC), heating_slope (kWh/HDD),
-              cooling_balance_temperature (degF or degC), cooling_slope (kWh/CDD)].
+              heating_balance_temperature (degF or degC),
+              heating_slope (kWh/HDD),
+              cooling_balance_temperature (degF or degC),
+              cooling_slope (kWh/CDD)].
 
               For natural_gas: [base_daily_consumption (kWh/day),
-              heating_balance_temperature (degF or degC), heating_slope (kWh/HDD)].
+              heating_balance_temperature (degF or degC), heating_slope
+              (kWh/HDD)].
 
         """
         return super(DefaultResidentialMeter, self).evaluate(data_collection)

@@ -55,7 +55,7 @@ def test_init(natural_gas_xml):
     # TODO: add assertions
     # read from filepath
     natural_gas_parser = ESPIUsageParser(filepath)
-    timezone = natural_gas_parser.get_timezone()
+    natural_gas_parser.get_timezone()
 
 
 def test_local_time_parameters(natural_gas_parser):

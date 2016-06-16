@@ -94,7 +94,8 @@ def test_import_seed_timeseries():
     timestamps = [(d, d + timedelta(days=30)) for d in dates]
 
     conn.execute(seed_timeseries.insert(), [
-        {"meter_id": meter, "reading": 1.0, "cost": 0, "begin_time": ts[0], "end_time": ts[1]}
+        {"meter_id": meter, "reading": 1.0, "cost": 0, "begin_time": ts[0],
+         "end_time": ts[1]}
         for ts in timestamps for meter in [1, 2, 3, 4]]
     )
 

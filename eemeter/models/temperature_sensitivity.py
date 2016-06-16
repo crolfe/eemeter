@@ -64,7 +64,8 @@ class Model(object):
         and returns usage estimates.
         """
         if self.initial_params is None:
-            message = "must have initial_params defined for model fitting procedure."
+            message = ("must have initial_params defined for model fitting "
+                       "procedure.")
             raise ValueError(message)
         else:
             x0 = self.initial_params.to_array()
@@ -177,9 +178,8 @@ class AverageDailyBaseloadHeatingConsumptionModel(Model):
             avg_daily_heating_consumption = np.nanmean(
                 daily_heating_demand * heating_slope)
 
-            avg_daily_consumption_estimate = avg_daily_heating_consumption + base_daily_consumption
-            avg_daily_consumption_estimates.append(
-                avg_daily_consumption_estimate)
+            estimate = avg_daily_heating_consumption + base_daily_consumption
+            avg_daily_consumption_estimates.append(estimate)
 
         return np.array(avg_daily_consumption_estimates)
 
@@ -213,9 +213,8 @@ class AverageDailyBaseloadCoolingConsumptionModel(Model):
             avg_daily_cooling_consumption = np.nanmean(
                 daily_cooling_demand * cooling_slope)
 
-            avg_daily_consumption_estimate = avg_daily_cooling_consumption + base_daily_consumption
-            avg_daily_consumption_estimates.append(
-                avg_daily_consumption_estimate)
+            estimate = avg_daily_cooling_consumption + base_daily_consumption
+            avg_daily_consumption_estimates.append(estimate)
 
         return np.array(avg_daily_consumption_estimates)
 

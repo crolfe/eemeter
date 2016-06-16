@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta as td
 
 import numpy as np
 import pandas as pd
@@ -163,46 +163,51 @@ def records_interval_start_15min(request):
 
 @pytest.fixture
 def records_arbitrary_basic(request):
-    records = [
+    return [
         {
-            "start": datetime(
-                2015, 2, 1, 0, 0, 0), "end": datetime(
-                2015, 2, 28), "value": 0}, {
-                    "start": datetime(
-                        2015, 1, 2, 0, 0, 0), "end": datetime(
-                            2015, 2, 1), "value": 0}, {
-                                "start": datetime(
-                                    2015, 1, 1, 1, 4, 5), "end": datetime(
-                                        2015, 1, 1, 2, 4, 5), "value": 1}, {
-                                            "start": datetime(
-                                                2015, 1, 1, 0, 4, 5), "end": datetime(
-                                                    2015, 1, 1, 1, 4, 5), "value": np.nan}, {
-                                                        "start": datetime(
-                                                            2015, 1, 1, 0, 0, 0), "end": datetime(
-                                                                2015, 1, 1, 0, 4, 5), }]
-    return records
+            "start": datetime(2015, 2, 1, 0, 0, 0),
+            "end": datetime(2015, 2, 28),
+            "value": 0},
+        {
+            "start": datetime(2015, 1, 2, 0, 0, 0),
+            "end": datetime(2015, 2, 1),
+            "value": 0},
+        {
+            "start": datetime(2015, 1, 1, 1, 4, 5),
+            "end": datetime(2015, 1, 1, 2, 4, 5),
+            "value": 1},
+        {
+            "start": datetime(2015, 1, 1, 0, 4, 5),
+            "end": datetime(2015, 1, 1, 1, 4, 5),
+            "value": np.nan},
+        {
+            "start": datetime(2015, 1, 1, 0, 0, 0),
+            "end": datetime(2015, 1, 1, 0, 4, 5)}
+        ]
 
 
 @pytest.fixture
 def records_arbitrary_overlap(request):
-    records = [
+    return [
         {
-            "start": datetime(
-                2015, 1, 20, 0, 0, 0), "end": datetime(
-                2015, 2, 28), "value": 0}, {
-                    "start": datetime(
-                        2015, 1, 2, 0, 0, 0), "end": datetime(
-                            2015, 2, 1), "value": 0}, {
-                                "start": datetime(
-                                    2015, 1, 1, 1, 4, 5), "end": datetime(
-                                        2015, 1, 1, 2, 4, 5), "value": 1}, {
-                                            "start": datetime(
-                                                2015, 1, 1, 0, 4, 5), "end": datetime(
-                                                    2015, 1, 1, 1, 4, 5), "value": np.nan}, {
-                                                        "start": datetime(
-                                                            2015, 1, 1, 0, 0, 0), "end": datetime(
-                                                                2015, 1, 1, 0, 4, 5), }]
-    return records
+            "start": datetime(2015, 1, 20, 0, 0, 0),
+            "end": datetime(2015, 2, 28),
+            "value": 0},
+        {
+            "start": datetime(2015, 1, 2, 0, 0, 0),
+            "end": datetime(2015, 2, 1),
+            "value": 0},
+        {
+            "start": datetime(2015, 1, 1, 1, 4, 5),
+            "end": datetime(2015, 1, 1, 2, 4, 5),
+            "value": 1},
+        {
+            "start": datetime(2015, 1, 1, 0, 4, 5),
+            "end": datetime(2015, 1, 1, 1, 4, 5),
+            "value": np.nan},
+        {
+            "start": datetime(2015, 1, 1, 0, 0, 0),
+            "end": datetime(2015, 1, 1, 0, 4, 5)}]
 
 
 @pytest.fixture(params=[
@@ -211,7 +216,8 @@ def records_arbitrary_overlap(request):
      {"start": datetime(2015, 1, 1, 1, 4, 5), "value": 0},
      {"start": datetime(2015, 1, 1, 0, 4, 5), "value": 0},
      {"start": datetime(2015, 1, 1, 0, 0, 0), "value": 0}],
-    [{"start": datetime(2015, 1, 2, 0, 0, 0), "end": datetime(2015, 2, 1), "value": 1},
+    [{"start": datetime(2015, 1, 2, 0, 0, 0), "end": datetime(2015, 2, 1),
+      "value": 1},
      {"start": datetime(2015, 1, 1, 1, 4, 5), "value": 0},
      {"start": datetime(2015, 1, 1, 0, 4, 5), "value": 0},
      {"start": datetime(2015, 1, 1, 0, 0, 0), "value": 0}],
@@ -225,7 +231,8 @@ def records_arbitrary_start(request):
      {"end": datetime(2015, 1, 2, 0, 0, 0), "value": 1},
      {"end": datetime(2015, 1, 1, 1, 4, 5), "value": 0},
      {"end": datetime(2015, 1, 1, 0, 4, 5), "value": 0},
-     {"end": datetime(2015, 1, 1, 0, 0, 0), "start": datetime(2014, 2, 2), "value": 0}],
+     {"end": datetime(2015, 1, 1, 0, 0, 0), "start": datetime(2014, 2, 2),
+      "value": 0}],
     [{"end": datetime(2015, 2, 1), "value": 0},
      {"end": datetime(2015, 1, 2, 0, 0, 0), "value": 1},
      {"end": datetime(2015, 1, 1, 1, 4, 5), "value": 0},
@@ -262,16 +269,11 @@ def consumption_data_kWh_interval():
 
 @pytest.fixture
 def consumption_data_kWh_arbitrary():
-    records = [{"start": datetime(2015, 1, i +
-                                  1), "end": datetime(2015, 1, i +
-                                                      2), "value": 1} for i in range(10)]
-    return ConsumptionData(
-        records,
-        "electricity",
-        "kWh",
-        record_type="arbitrary")
-
-# tests
+    records = [{"start": datetime(2015, 1, i + 1),
+                "end": datetime(2015, 1, i + 2),
+                "value": 1} for i in range(10)]
+    return ConsumptionData(records, "electricity", "kWh",
+                           record_type="arbitrary")
 
 
 def test_consumption_data_interval_start_daily_all_has_correct_attributes(
@@ -281,7 +283,7 @@ def test_consumption_data_interval_start_daily_all_has_correct_attributes(
     assert cd.fuel_type == fuel_type
     assert cd.unit_name == unit_name
     assert cd.freq == "D"
-    assert cd.freq_timedelta == timedelta(days=1)
+    assert cd.freq_td == td(days=1)
     assert isinstance(cd.data.index, pd.DatetimeIndex)
     assert cd.data.index.shape == (5,)
     assert cd.data.values.shape == (5,)
@@ -306,7 +308,7 @@ def test_consumption_data_interval_start_daily_all_freq_D(
         records_interval_start_daily_all, fuel_type, unit_name):
     cd = ConsumptionData(records_interval_start_daily_all,
                          fuel_type, unit_name, freq="D")
-    assert cd.freq_timedelta == timedelta(days=1)
+    assert cd.freq_td == td(days=1)
     assert_allclose(cd.data.values, [1, 2, 3, 4, 5], rtol=RTOL, atol=ATOL)
     assert cd.data.index[0] == datetime(2015, 1, 1)
     assert_allclose(
@@ -318,7 +320,7 @@ def test_consumption_data_interval_end_daily_all_freq_D(
         records_interval_end_daily_all, fuel_type, unit_name):
     cd = ConsumptionData(records_interval_end_daily_all,
                          fuel_type, unit_name, freq="D")
-    assert cd.freq_timedelta == timedelta(days=1)
+    assert cd.freq_td == td(days=1)
     assert_allclose(cd.data.values, [1, 2, 3, 4, 5], rtol=RTOL, atol=ATOL)
     assert cd.data.index[0] == datetime(2014, 12, 31)
 
@@ -327,7 +329,7 @@ def test_consumption_data_interval_end_daily_all_freq_2D(
         records_interval_end_daily_all, fuel_type, unit_name):
     cd = ConsumptionData(records_interval_end_daily_all,
                          fuel_type, unit_name, freq="2D")
-    assert cd.freq_timedelta == timedelta(days=2)
+    assert cd.freq_td == td(days=2)
     assert_allclose(cd.data.values, [1, 3, 5], rtol=RTOL, atol=ATOL)
     assert cd.data.index[0] == datetime(2014, 12, 30)
 
@@ -336,10 +338,10 @@ def test_consumption_data_interval_end_daily_all_freq_12H(
         records_interval_end_daily_all, fuel_type, unit_name):
     cd = ConsumptionData(records_interval_end_daily_all,
                          fuel_type, unit_name, freq="12H")
-    assert cd.freq_timedelta == timedelta(seconds=60 * 60 * 12)
-    assert_allclose(
-        cd.data.values, [
-            1, np.nan, 2, np.nan, 3, np.nan, 4, np.nan, 5], rtol=RTOL, atol=ATOL)
+    assert cd.freq_td == td(seconds=60 * 60 * 12)
+    assert_allclose(cd.data.values,
+                    [1, np.nan, 2, np.nan, 3, np.nan, 4, np.nan, 5],
+                    rtol=RTOL, atol=ATOL)
     assert cd.data.index[0] == datetime(2014, 12, 31, 12)
 
 
@@ -354,7 +356,7 @@ def test_consumption_data_interval_start_daily_missing_date_freq_D(
         records_interval_start_daily_missing_date, fuel_type, unit_name):
     cd = ConsumptionData(records_interval_start_daily_missing_date,
                          fuel_type, unit_name, freq="D")
-    assert cd.freq_timedelta == timedelta(days=1)
+    assert cd.freq_td == td(days=1)
     assert_allclose(cd.data.values, [1, 2, np.nan, 4, 5], rtol=RTOL, atol=ATOL)
     assert cd.data.index[0] == datetime(2015, 1, 1)
 
@@ -363,7 +365,7 @@ def test_consumption_data_interval_start_daily_misaligned_date_freq_D(
         records_interval_start_daily_misaligned_date, recwarn):
     cd = ConsumptionData(records_interval_start_daily_misaligned_date,
                          "electricity", "kWh", freq="D")
-    assert cd.freq_timedelta == timedelta(days=1)
+    assert cd.freq_td == td(days=1)
     assert_allclose(cd.data.values, [1, 2, np.nan, 4, 5], rtol=RTOL, atol=ATOL)
     assert cd.data.index[0] == datetime(2015, 1, 1)
     w = recwarn.pop(UserWarning)
@@ -374,7 +376,7 @@ def test_consumption_data_interval_start_daily_overlapping_date_freq_D(
         records_interval_start_daily_overlapping_date, recwarn):
     cd = ConsumptionData(records_interval_start_daily_overlapping_date,
                          "electricity", "kWh", freq="D")
-    assert cd.freq_timedelta == timedelta(days=1)
+    assert cd.freq_td == td(days=1)
     assert_allclose(cd.data.values, [1, 2, 3, 4, 5], rtol=RTOL, atol=ATOL)
     assert cd.data.index[0] == datetime(2015, 1, 1)
     w = recwarn.pop(UserWarning)
@@ -385,7 +387,7 @@ def test_consumption_data_interval_start_daily_missing_value_freq_D(
         records_interval_start_daily_missing_value):
     cd = ConsumptionData(records_interval_start_daily_missing_value,
                          "electricity", "kWh", freq="D")
-    assert cd.freq_timedelta == timedelta(days=1)
+    assert cd.freq_td == td(days=1)
     assert_allclose(cd.data.values, [1, 2, np.nan, 4, 5], rtol=RTOL, atol=ATOL)
     assert cd.data.index[0] == datetime(2015, 1, 1)
 
@@ -394,7 +396,7 @@ def test_consumption_data_interval_start_15min(
         records_interval_start_15min, fuel_type, unit_name):
     cd = ConsumptionData(records_interval_start_15min,
                          fuel_type, unit_name, freq="15T")
-    assert cd.freq_timedelta == timedelta(seconds=60 * 15)
+    assert cd.freq_td == td(seconds=60 * 15)
     assert_allclose(cd.data.values, [1, 2, 3, 4, 5, 6], rtol=RTOL, atol=ATOL)
     assert cd.data.index[0] == datetime(2015, 1, 1)
     assert cd.pulse_value is None
@@ -411,7 +413,7 @@ def test_consumption_data_arbitrary_basic(
         unit_name,
         record_type=record_type_arbitrary)
     assert cd.freq is None
-    assert cd.freq_timedelta is None
+    assert cd.freq_td is None
     assert cd.pulse_value is None
     assert_allclose(cd.data.values, [np.nan, np.nan, 1, np.nan, 0, 0, np.nan],
                     rtol=RTOL, atol=ATOL)
@@ -444,7 +446,7 @@ def test_consumption_data_arbitrary_start(
     assert cd.data.index[0] == datetime(2015, 1, 1)
     assert cd.data.index[4] == datetime(2015, 2, 1)
     assert cd.freq is None
-    assert cd.freq_timedelta is None
+    assert cd.freq_td is None
     assert cd.pulse_value is None
 
     generated_records = cd.records(record_type=record_type_arbitrary_start)
@@ -471,7 +473,7 @@ def test_consumption_data_arbitrary_end(
     assert cd.data.index[0] == datetime(2014, 2, 2)
     assert cd.data.index[5] == datetime(2015, 2, 1)
     assert cd.freq is None
-    assert cd.freq_timedelta is None
+    assert cd.freq_td is None
     assert cd.pulse_value is None
 
     generated_records = cd.records(record_type=record_type_arbitrary_end)
@@ -518,7 +520,7 @@ def test_consumption_data_pulse(records_pulse,
     assert cd.data.index[0] == datetime(2015, 1, 1)
     assert cd.data.index[4] == datetime(2015, 2, 1)
     assert cd.freq is None
-    assert cd.freq_timedelta is None
+    assert cd.freq_td is None
     assert cd.pulse_value == 1
 
     generated_records = cd.records(record_type="pulse")
@@ -723,7 +725,7 @@ def test_consumption_data_init_from_interval_data(
                          data=consumption_data_kWh_interval.data,
                          estimated=consumption_data_kWh_interval.estimated,
                          freq=consumption_data_kWh_interval.freq)
-    cd.freq_timedelta is not None
+    cd.freq_td is not None
 
     with pytest.raises(ValueError):
         cd = ConsumptionData(records=None,
@@ -748,7 +750,7 @@ def test_consumption_data_init_from_arbitrary_data(
                          unit_name=consumption_data_kWh_arbitrary.unit_name,
                          data=consumption_data_kWh_arbitrary.data,
                          estimated=consumption_data_kWh_arbitrary.estimated)
-    cd.freq_timedelta is None
+    cd.freq_td is None
 
     with pytest.raises(ValueError):
         cd = ConsumptionData(
@@ -813,7 +815,7 @@ def test_unit_conversion():
 def test_downsample_fifteen_min():
 
     records = [{
-        "start": datetime(2015, 1, 1, tzinfo=pytz.UTC) + timedelta(seconds=i * 900),
+        "start": datetime(2015, 1, 1, tzinfo=pytz.UTC) + td(seconds=i * 900),
         "value": np.nan if i % 30 == 0 or 1000 < i < 2000 else 0.1,
         "estimated": i % 3 == 0 or 2000 < i < 3000,
     } for i in range(10000)]
@@ -844,7 +846,7 @@ def test_downsample_fifteen_min():
 
 def test_downsample_two_day():
     records = [{
-        "start": datetime(2015, 1, 1, tzinfo=pytz.UTC) + timedelta(days=2 * i),
+        "start": datetime(2015, 1, 1, tzinfo=pytz.UTC) + td(days=2 * i),
         "value": 1.0,
         "estimated": False,
     } for i in range(100)]
@@ -888,7 +890,7 @@ def test_downsample_single_record():
 
 def test_downsample_hourly_frequency():
     records = [{
-        "start": datetime(2015, 1, 1, tzinfo=pytz.UTC) + timedelta(seconds=i * 900),
+        "start": datetime(2015, 1, 1, tzinfo=pytz.UTC) + td(seconds=i * 900),
         "value": np.nan if i % 30 == 0 or 1000 < i < 2000 else 0.1,
         "estimated": i % 3 == 0 or 2000 < i < 3000,
     } for i in range(10000)]

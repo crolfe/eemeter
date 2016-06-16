@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages, Command
 
 version = __import__('eemeter').get_version()
-
+keywords = 'open energy efficiency meter method methods calculation savings'
 long_desc = "Standard methods for calculating energy efficiency savings."
 
 
@@ -41,7 +41,7 @@ setup(name='eemeter',
           'Programming Language :: Python :: 3',
       ],
       cmdclass={'test': PyTest},
-      keywords='open energy efficiency meter method methods calculation savings',
+      keywords=keywords,
       packages=find_packages(),
       install_requires=['pint',
                         'pyyaml',
@@ -51,5 +51,4 @@ setup(name='eemeter',
                         'pandas >= 0.18',
                         'requests',
                         'pytz'],
-      package_data={'': ['*.json', '*.gz']},
-      )
+      package_data={'': ['*.json', '*.gz']})

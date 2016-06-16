@@ -556,8 +556,9 @@ class ESPIUsageParser(object):
 
         try:
             # Parse Daylight Savings Time elements.
-            #   The start rule and end rule are weird encoded ways of saying when
-            #   DST should be in effect, and the offset is the actual effect.
+            #   The start rule and end rule are weird encoded ways of saying
+            #   when DST should be in effect, and the offset is the
+            #   actual effect.
             dst_start_rule = local_time_parameters.find(
                 '{http://naesb.org/espi}dstStartRule').text
             dst_end_rule = local_time_parameters.find(
@@ -638,20 +639,22 @@ class ESPIUsageParser(object):
             Data in the ReadingType element.
         """
 
-        # Initialize Getter class for reading type element, to make getting and parsing
-        # the values of child elements easier.
+        # Initialize Getter class for reading type element, to make getting
+        # and parsing the values of child elements easier.
         reading_type = self.ChildElementGetter(
             reading_type_element, self.VALUE_PARSERS)
 
         data_spec = [
-            ('accumulation_behavior', '{http://naesb.org/espi}accumulationBehaviour'),
+            ('accumulation_behavior',
+             '{http://naesb.org/espi}accumulationBehaviour'),
             ('commodity', '{http://naesb.org/espi}commodity'),
             ('data_qualifier', '{http://naesb.org/espi}dataQualifier'),
             ('default_quality', '{http://naesb.org/espi}defaultQuality'),
             ('flow_direction', '{http://naesb.org/espi}flowDirection'),
             ('interval_length', '{http://naesb.org/espi}intervalLength'),
             ('kind', '{http://naesb.org/espi}kind'),
-            ('power_of_ten_multiplier', '{http://naesb.org/espi}powerOfTenMultiplier'),
+            ('power_of_ten_multiplier',
+             '{http://naesb.org/espi}powerOfTenMultiplier'),
             ('time_attribute', '{http://naesb.org/espi}timeAttribute'),
             ('uom', '{http://naesb.org/espi}uom'),
             ('measuring_period', '{http://naesb.org/espi}measuringPeriod'),
@@ -701,7 +704,8 @@ class ESPIUsageParser(object):
                 if group is not None:
                     group["interval_blocks"].append(interval_block_element)
                 else:
-                    message = "Unusually formatted green button data - interval block before reading type."
+                    message = ("Unusually formatted green button data - "
+                               "interval block before reading type.")
                     raise ValueError(message)
             else:
                 pass  # ignore other types for now
@@ -730,8 +734,10 @@ class ESPIUsageParser(object):
         data : dict
             Data in the IntervalReading element.
         '''
-        reading_quality_element = interval_reading.find(
-            "{http://naesb.org/espi}ReadingQuality/{http://naesb.org/espi}quality")
+        xpath = ("{http://naesb.org/espi}ReadingQuality/"
+                 "{http://naesb.org/espi}quality")
+        reading_quality_element = interval_reading.find(xpath)
+
         try:
             reading_quality = self.QUALITY_OF_READING[
                 reading_quality_element.text]
@@ -778,7 +784,7 @@ class ESPIUsageParser(object):
             IntervalBlock elements, and associated ReadingType, e.g.::
 
                 {
-                    'reading_type': <Element {http://naesb.org/espi}ReadingType at 0x112350f50>},
+                    'reading_type': <Element {http://naesb.org/espi}ReadingType at 0x112350f50>},  # NOQA
                     'interval_blocks': [
                         <Element {http://naesb.org/espi}IntervalBlock at 0x112236e10>,
                         <Element {http://naesb.org/espi}IntervalBlock at 0x112350d20>,
@@ -826,8 +832,9 @@ class ESPIUsageParser(object):
             int(interval_start_element.text), tz=pytz.UTC)
 
         # Collect and parse all interval readings for the block.
-        interval_readings = [self.parse_interval_reading(reading) for reading
-                             in interval_block.findall("{http://naesb.org/espi}IntervalReading")]
+        xpath = "{http://naesb.org/espi}IntervalReading"
+        interval_readings = [self.parse_interval_reading(reading)
+                             for reading in interval_block.findall(xpath)]
 
         data = {
             "interval": {
@@ -972,12 +979,14 @@ class ESPIUsageParser(object):
                         and forward["end"] == reverse["end"] \
                         and forward["fuel_type"] == reverse["fuel_type"] \
                         and forward["unit_name"] == reverse["unit_name"]:
+
+                    estimated = forward["estimated"] or reverse["estimated"]
                     records.append({
                         "start": forward["start"],
                         "end": forward["end"],
                         "fuel_type": forward["fuel_type"],
                         "unit_name": forward["unit_name"],
-                        "estimated": forward["estimated"] or reverse["estimated"],
+                        "estimated": estimated,
                         "value": forward["value"] - reverse["value"],
                     })
                 else:

@@ -55,7 +55,9 @@ class DataContainer:
                             "value": v["value"].json(),
                             "tags": v["tags"],
                         } for v in self.value]
-                    else:  # for values explicitly defining json method, e.g. parameters
+                    else:
+                        # for values explicitly defining json methods
+                        # e.g. parameters
                         return self.value.json()
                 except AttributeError:
                     try:  # for numpy arrays
@@ -87,7 +89,8 @@ class DataCollection:
 
         E.g.:
 
-            data_collection = DataCollection(a="value_a", b="value_b", tags=["tag1"])
+            data_collection = DataCollection(a="value_a", b="value_b",
+                                             tags=["tag1"])
 
         This object will now hold two data containers, each with a single tag
         ("tag1"). The two data containers will have, respectively, the names
@@ -321,7 +324,8 @@ class MeterBase(object):
         This input_mapping could be used to map objects in a DataCollection
         that looks like this::
 
-            data_collection = DataCollection(name1="value1", name2="value2", tags=["tag0"])
+            data_collection = DataCollection(name1="value1", name2="value2",
+                                             tags=["tag0"])
 
         to inputs to an evaluate_raw function that looks like this::
 
