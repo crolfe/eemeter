@@ -744,8 +744,10 @@ class ESPIUsageParser(object):
         except AttributeError:
             reading_quality = None
 
-        duration_element = interval_reading.find(
-            "{http://naesb.org/espi}timePeriod/{http://naesb.org/espi}duration")
+        xpath = ("{http://naesb.org/espi}timePeriod/{"
+                 "http://naesb.org/espi}duration")
+        duration_element = interval_reading.find(xpath)
+
         duration = timedelta(seconds=int(duration_element.text))
 
         start_element = interval_reading.find(

@@ -108,8 +108,9 @@ class AverageDailyTemperatureSensitivityModel(Model):
     def __init__(self, heating, cooling, *args, **kwargs):
         if cooling:
             if heating:
-                self.model = AverageDailyBaseloadHeatingCoolingConsumptionModel(
-                    *args, **kwargs)
+                model = AverageDailyBaseloadHeatingCoolingConsumptionModel(
+                        *args, **kwargs)
+                self.model = model
             else:
                 self.model = AverageDailyBaseloadCoolingConsumptionModel(
                     *args, **kwargs)

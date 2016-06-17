@@ -1,0 +1,7 @@
+!obj:eemeter.meter.EstimatedAverageDailyUsage {
+    temperature_unit_str: "degF",
+    model: !obj:eemeter.models.AverageDailyTemperatureSensitivityModel {
+        cooling: True,
+        heating: True,
+    },
+}

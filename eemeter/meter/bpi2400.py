@@ -1,7 +1,7 @@
 from eemeter.meter.base import YamlDefinedMeter
 
 
-with open('bpi2400.yaml', 'r') as f:
+with open('eemeter/meter/bpi2400.yaml', 'r') as f:
     bpi_meter_yaml = f.read()
 
 

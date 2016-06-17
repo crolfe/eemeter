@@ -716,7 +716,8 @@ class ProjectAttributes(MeterBase):
         -------
         out : dict
             - "location": eemeter.location.Location object
-            - "consumption": list of eemeter.consumption.ConsumptionData objects
+            - "consumption": list of eemeter.consumption.ConsumptionData
+               objects
             - "baseline_period": eemeter.evaluation.Period
             - "reporting_period": eemeter.evaluation.Period
             - "other_periods": list of eemeter.evaluation.Period objects

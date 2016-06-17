@@ -1,7 +1,7 @@
 from eemeter.meter.base import YamlDefinedMeter
 
 
-with open('default_residential_meter.yaml', 'r') as f:
+with open('eemeter/meter/default_residential_meter.yaml', 'r') as f:
     default_residential_meter_yaml = f.read()
 
 
@@ -169,7 +169,6 @@ class DefaultResidentialMeter(YamlDefinedMeter):
 
     @property
     def yaml(self):
-
         return default_residential_meter_yaml
 
     def evaluate(self, data_collection):

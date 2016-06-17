@@ -1,0 +1,237 @@
+!obj:eemeter.meter.Sequence {
+    sequence: [
+        !obj:eemeter.meter.ProjectAttributes {
+            input_mapping: { project: {} },
+            output_mapping: {
+                weather_source: {},
+                weather_normal_source: {},
+            },
+        },
+        !obj:eemeter.meter.ProjectConsumptionDataBaselineReporting {
+            input_mapping: { project: {} },
+            output_mapping: { consumption: {}, },
+        },
+        !obj:eemeter.meter.For {
+            variable: { name: consumption_data_raw },
+            iterable: { name: consumption },
+            meter: !obj:eemeter.meter.Sequence {
+                sequence: [
+                    !obj:eemeter.meter.DownsampleConsumption {
+                        freq: 'D',
+                        input_mapping: { consumption_data: {name: consumption_data_raw} },
+                        output_mapping: { consumption_downsampled: {name: consumption_data}, },
+                    },
+                    !obj:eemeter.meter.BPI_2400_S_2012_ModelCalibrationUtilityBillCriteria {
+                        temperature_unit_str: !setting temperature_unit_str,
+                        settings: {
+                            temperature_unit_str: !setting temperature_unit_str,
+                            electricity_baseload_low: !setting electricity_baseload_low,
+                            electricity_baseload_x0: !setting electricity_baseload_x0,
+                            electricity_baseload_high: !setting electricity_baseload_high,
+                            electricity_heating_slope_low: !setting electricity_heating_slope_low,
+                            electricity_heating_slope_x0: !setting electricity_heating_slope_x0,
+                            electricity_heating_slope_high: !setting electricity_heating_slope_high,
+                            electricity_cooling_slope_low: !setting electricity_cooling_slope_low,
+                            electricity_cooling_slope_x0: !setting electricity_cooling_slope_x0,
+                            electricity_cooling_slope_high: !setting electricity_cooling_slope_high,
+                            natural_gas_baseload_low: !setting natural_gas_baseload_low,
+                            natural_gas_baseload_x0: !setting natural_gas_baseload_x0,
+                            natural_gas_baseload_high: !setting natural_gas_baseload_high,
+                            natural_gas_heating_slope_low: !setting natural_gas_heating_slope_low,
+                            natural_gas_heating_slope_x0: !setting natural_gas_heating_slope_x0,
+                            natural_gas_heating_slope_high: !setting natural_gas_heating_slope_high,
+                            heating_balance_temp_low: !setting heating_balance_temp_low,
+                            heating_balance_temp_x0: !setting heating_balance_temp_x0,
+                            heating_balance_temp_high: !setting heating_balance_temp_high,
+                            cooling_balance_temp_low: !setting cooling_balance_temp_low,
+                            cooling_balance_temp_x0: !setting cooling_balance_temp_x0,
+                            cooling_balance_temp_high: !setting cooling_balance_temp_high,
+                            hdd_base: !setting hdd_base,
+                            cdd_base: !setting cdd_base,
+                        },
+                        tagspace: ["bpi2400"],
+                    },
+                    !obj:eemeter.meter.Sequence {
+                        sequence: [
+                            !obj:eemeter.meter.Switch {
+                                target: {
+                                    name: fuel_type,
+                                    tags: ["bpi2400"]
+                                },
+                                cases: {
+                                    electricity: !obj:eemeter.meter.Sequence {
+                                        sequence: [
+                                            !obj:eemeter.meter.TemperatureSensitivityParameterOptimizationMeter {
+                                                temperature_unit_str: !setting temperature_unit_str,
+                                                model: !obj:eemeter.models.AverageDailyTemperatureSensitivityModel &electricity_model {
+                                                    cooling: True,
+                                                    heating: True,
+                                                    initial_params: {
+                                                        base_daily_consumption: !setting electricity_baseload_x0,
+                                                        heating_slope: !setting electricity_heating_slope_x0,
+                                                        cooling_slope: !setting electricity_cooling_slope_x0,
+                                                        heating_balance_temperature: !setting heating_balance_temp_x0,
+                                                        cooling_balance_temperature: !setting cooling_balance_temp_x0,
+                                                    },
+                                                    param_bounds: {
+                                                        base_daily_consumption: [!setting electricity_baseload_low, !setting electricity_baseload_high],
+                                                        heating_slope: [!setting electricity_heating_slope_low, !setting electricity_heating_slope_high],
+                                                        cooling_slope: [!setting electricity_heating_slope_low, !setting electricity_cooling_slope_high],
+                                                        heating_balance_temperature: [!setting heating_balance_temp_low, !setting heating_balance_temp_high],
+                                                        cooling_balance_temperature: [!setting cooling_balance_temp_low, !setting cooling_balance_temp_high],
+                                                    },
+                                                },
+                                                input_mapping: {
+                                                    consumption_data: {},
+                                                    weather_source: {},
+                                                    energy_unit_str: {},
+                                                },
+                                                output_mapping: {
+                                                    temp_sensitivity_params: { name: model_params },
+                                                    average_daily_usages: {},
+                                                    estimated_average_daily_usages: {},
+                                                },
+                                            },
+                                            !obj:eemeter.meter.AnnualizedUsageMeter {
+                                                temperature_unit_str: !setting temperature_unit_str,
+                                                model: *electricity_model,
+                                                input_mapping: {
+                                                    model_params: {},
+                                                    weather_normal_source: {},
+                                                },
+                                                output_mapping: {
+                                                    annualized_usage: {},
+                                                },
+                                            },
+                                        ]
+                                    },
+                                    natural_gas: !obj:eemeter.meter.Sequence {
+                                        sequence: [
+                                            !obj:eemeter.meter.TemperatureSensitivityParameterOptimizationMeter {
+                                                temperature_unit_str: !setting temperature_unit_str,
+                                                model: !obj:eemeter.models.AverageDailyTemperatureSensitivityModel &natural_gas_model {
+                                                    cooling: False,
+                                                    heating: True,
+                                                    initial_params: {
+                                                        base_daily_consumption: !setting natural_gas_baseload_x0,
+                                                        heating_slope: !setting natural_gas_heating_slope_x0,
+                                                        heating_balance_temperature: !setting heating_balance_temp_x0,
+                                                    },
+                                                    param_bounds: {
+                                                        base_daily_consumption: [!setting natural_gas_baseload_low, !setting natural_gas_baseload_high],
+                                                        heating_slope: [!setting natural_gas_heating_slope_low, !setting natural_gas_heating_slope_high],
+                                                        heating_balance_temperature: [!setting heating_balance_temp_low, !setting heating_balance_temp_high],
+                                                    },
+                                                },
+                                                input_mapping: {
+                                                    consumption_data: {},
+                                                    weather_source: {},
+                                                    energy_unit_str: {},
+                                                },
+                                                output_mapping: {
+                                                    temp_sensitivity_params: { name: model_params },
+                                                    average_daily_usages: {},
+                                                    estimated_average_daily_usages: {},
+                                                },
+                                            },
+                                            !obj:eemeter.meter.AnnualizedUsageMeter {
+                                                temperature_unit_str: !setting temperature_unit_str,
+                                                model: *natural_gas_model,
+                                                input_mapping: {
+                                                    model_params: {},
+                                                    weather_normal_source: {},
+                                                },
+                                                output_mapping: {
+                                                    annualized_usage: {},
+                                                },
+                                            },
+                                        ]
+                                    },
+                                },
+                            },
+                            !obj:eemeter.meter.RMSE {
+                                input_mapping: {
+                                    y: { name: average_daily_usages },
+                                    y_hat: { name: estimated_average_daily_usages },
+                                },
+                                output_mapping: {
+                                    rmse: {},
+                                }
+                            },
+                            !obj:eemeter.meter.RSquared {
+                                input_mapping: {
+                                    y: { name: average_daily_usages },
+                                    y_hat: { name: estimated_average_daily_usages },
+                                },
+                                output_mapping: {
+                                    r_squared: {},
+                                }
+                            },
+                        ],
+                    },
+                ]
+            },
+        },
+        !obj:eemeter.meter.ProjectFuelTypes {
+            input_mapping: { project: {} },
+            output_mapping: { fuel_types: {} },
+        },
+        !obj:eemeter.meter.For {
+            variable: { name: active_fuel_type },
+            iterable: { name: fuel_types },
+            meter: !obj:eemeter.meter.FuelTypeTagFilter {
+                fuel_type_search_name: active_fuel_type,
+                input_mapping: {
+                    weather_source: {},
+                    active_fuel_type: {},
+                },
+                meter: !obj:eemeter.meter.Switch {
+                    target: {
+                        name: active_fuel_type,
+                        tags: [],
+                    },
+                    cases: {
+                        electricity: !obj:eemeter.meter.GrossSavingsMeter {
+                            temperature_unit_str: !setting temperature_unit_str,
+                            model: *electricity_model,
+                            input_mapping: {
+                                model_params_baseline: {
+                                    name: model_params,
+                                    tags: [ baseline ]
+                                },
+                                consumption_data_reporting : {
+                                    name: consumption_data_no_estimated,
+                                    tags: [ reporting ]
+                                },
+                                weather_source: {},
+                                energy_unit_str : { tags: [ baseline ] },
+                            },
+                            output_mapping: {
+                                gross_savings: {},
+                            },
+                        },
+                        natural_gas: !obj:eemeter.meter.GrossSavingsMeter {
+                            temperature_unit_str: !setting temperature_unit_str,
+                            model: *natural_gas_model,
+                            input_mapping: {
+                                model_params_baseline: {
+                                    name: model_params,
+                                    tags: [ baseline ]
+                                },
+                                consumption_data_reporting : {
+                                    name: consumption_data_no_estimated,
+                                    tags: [ reporting ]
+                                },
+                                weather_source: {},
+                                energy_unit_str : { tags: [ baseline ] },
+                            },
+                            output_mapping: {
+                                gross_savings: {},
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    ]
+}

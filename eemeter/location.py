@@ -337,5 +337,6 @@ class Location(object):
             self.zipcode = lat_lng_to_zipcode(self.lat, self.lng)
             self.station = station
         else:
-            message = "Please supply a lat/long, ZIP code or Weather Station ID"
+            message = ("Please supply a lat/long, ZIP code or "
+                       "Weather Station ID")
             raise ValueError(message)

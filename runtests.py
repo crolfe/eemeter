@@ -3053,9 +3053,9 @@ hQM19JTquefRuZvdCsFweSzr8lZqnbHqhazyaS/ERG9EPFFwBHj6qtj58HkRK5T9o5nQETpMXTdk
 SXEIy7WfJCBRf5C9b82ncU1ZikAfqYrI575uNxS8BpVtJBxVo/D3ztv/uh/+vyX51is=
 """
 
-import sys
-import base64
-import zlib
+import sys  # NOQA
+import base64  # NOQA
+import zlib  # NOQA
 
 
 class DictImporter(object):

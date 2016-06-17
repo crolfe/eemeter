@@ -76,9 +76,8 @@ class NOAAClient(object):
             # Bad connection. attempt to reconnect.
             except (ftplib.error_temp, EOFError) as e2:
                 logger.warn(
-                    "Failed FTP RETR for station %s: %s. Attempting reconnect.",
-                    station_id,
-                    e2)
+                    "Failed FTP RETR for station %s: %s. Attempting reconnect",
+                    station_id, e2)
                 self.ftp.close()
                 self.ftp = self._get_ftp_connection()
                 try:

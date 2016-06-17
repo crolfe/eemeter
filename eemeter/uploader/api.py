@@ -218,9 +218,9 @@ def upload_dataframes2(
             project_response_data = project_uploader.sync(project_data)
             consumption_metadata_data["project"] = project_response_data["id"]
 
-        consumption_metadata_response_data = consumption_metadata_uploader.sync(
-            consumption_metadata_data)
-        consumption_metadata_id = consumption_metadata_response_data["id"]
+        response_data = consumption_metadata_uploader.sync(
+                consumption_metadata_data)
+        consumption_metadata_id = response_data["id"]
 
         for consumption_record_data in consumption_records_data:
             consumption_record_data["metadata"] = consumption_metadata_id
@@ -318,9 +318,9 @@ def upload_dataframes(
             project_response_data = project_uploader.sync(project_data)
             consumption_metadata_data["project"] = project_response_data["id"]
 
-        consumption_metadata_response_data = consumption_metadata_uploader.sync(
-            consumption_metadata_data)
-        consumption_metadata_id = consumption_metadata_response_data["id"]
+        response_data = consumption_metadata_uploader.sync(
+                consumption_metadata_data)
+        consumption_metadata_id = response_data["id"]
 
         for consumption_record_data in consumption_records_data:
             consumption_record_data["metadata"] = consumption_metadata_id
